@@ -52,7 +52,9 @@
             var allTypes = assembliesToScan.SelectMany(a => a.ExportedTypes).ToArray();
 
             var profiles =
-                allTypes.Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()));
+                allTypes
+                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
+                    .Where(t => !t.GetTypeInfo().IsAbstract);
 
             Mapper.Initialize(cfg =>
             {

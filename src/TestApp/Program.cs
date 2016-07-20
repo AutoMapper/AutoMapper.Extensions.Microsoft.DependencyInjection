@@ -31,12 +31,10 @@ namespace TestApp
 
     public class Source
     {
-
     }
 
     public class Dest
     {
-
     }
 
     public class Source2

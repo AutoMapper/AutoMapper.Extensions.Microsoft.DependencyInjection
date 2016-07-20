@@ -27,6 +27,8 @@
         }
     }
 
+    public abstract class AbstractProfile : Profile { }
+
     public class Profile2 : Profile
     {
         public Profile2()
