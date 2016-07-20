@@ -72,7 +72,10 @@
             };
             foreach (var openType in openTypes)
             {
-                foreach (var type in allTypes.Where(t => t.ImplementsGenericInterface(openType)))
+                foreach (var type in allTypes
+                    .Where(t => t.GetTypeInfo().IsClass)
+                    .Where(t => !t.GetTypeInfo().IsAbstract)
+                    .Where(t => t.ImplementsGenericInterface(openType)))
                 {
                     services.AddTransient(type);
                 }
