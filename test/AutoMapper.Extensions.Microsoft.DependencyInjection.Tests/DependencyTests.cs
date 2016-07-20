@@ -13,7 +13,6 @@
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
-            services.AddTransient<DependencyResolver>();
             services.AddAutoMapper(typeof(Source));
             _provider = services.BuildServiceProvider();
         }

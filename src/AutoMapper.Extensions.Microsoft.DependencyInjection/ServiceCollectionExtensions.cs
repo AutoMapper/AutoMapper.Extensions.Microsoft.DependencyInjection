@@ -49,8 +49,10 @@
         {
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
+            var allTypes = assembliesToScan.SelectMany(a => a.ExportedTypes).ToArray();
+
             var profiles =
-                assembliesToScan.SelectMany(a => a.ExportedTypes).Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()));
+                allTypes.Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()));
 
             Mapper.Initialize(cfg =>
             {
@@ -60,9 +62,45 @@
                 }
             });
 
+            var openTypes = new[]
+            {
+                typeof(IValueResolver<,,>),
+                typeof(IMemberValueResolver<,,,>),
+                typeof(ITypeConverter<,>)
+            };
+            foreach (var openType in openTypes)
+            {
+                foreach (var type in allTypes.Where(t => t.ImplementsGenericInterface(openType)))
+                {
+                    services.AddTransient(type);
+                }
+            }
+
             services.AddSingleton(Mapper.Configuration);
             services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
+
+        private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
+        {
+            if (type.IsGenericType(interfaceType))
+            {
+                return true;
+            }
+            foreach (var @interface in type.GetTypeInfo().ImplementedInterfaces)
+            {
+                if (@interface.IsGenericType(interfaceType))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static bool IsGenericType(this Type type, Type genericType)
+        {
+            return type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
+        }
+
 
     }
 }
