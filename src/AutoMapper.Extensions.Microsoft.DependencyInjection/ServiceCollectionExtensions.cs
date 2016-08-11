@@ -11,42 +11,65 @@
 
     public static class ServiceCollectionExtensions
     {
+        private static readonly Assembly AutoMapperAssembly = typeof(Mapper).GetTypeInfo().Assembly;
+
+        private static readonly Action<IMapperConfigurationExpression> DefaultConfig = cfg => { };
 #if DEPENDENCY_MODEL
         public static void AddAutoMapper(this IServiceCollection services)
         {
-            services.AddAutoMapper(DependencyContext.Default);
+            services.AddAutoMapper(null, DependencyContext.Default);
         }
 
-        public static void AddAutoMapper(this IServiceCollection services, DependencyContext dependencyContext)
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction)
         {
-            services.AddAutoMapper(dependencyContext.RuntimeLibraries
-                .SelectMany(lib => lib.GetDefaultAssemblyNames(dependencyContext).Select(Assembly.Load)));
+            services.AddAutoMapper(additionalInitAction, DependencyContext.Default);
+        }
+
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, DependencyContext dependencyContext)
+        {
+            services.AddAutoMapper(additionalInitAction,
+                dependencyContext.RuntimeLibraries
+                    // Only load assemblies that reference AutoMapper
+                    .Where(lib => lib.Dependencies.Any(d => d.Name.Equals(AutoMapperAssembly.GetName().Name)))
+                    .SelectMany(lib => lib.GetDefaultAssemblyNames(dependencyContext)
+                        .Select(Assembly.Load)));
         }
 #endif
 
         public static void AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
         {
-            AddAutoMapperClasses(services, assemblies);
+            AddAutoMapperClasses(services, null, assemblies);
         }
 
-        public static void AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Assembly[] assemblies)
         {
-            AddAutoMapperClasses(services, assemblies);
+            AddAutoMapperClasses(services, additionalInitAction, assemblies);
+        }
+
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assemblies)
+        {
+            AddAutoMapperClasses(services, additionalInitAction, assemblies);
         }
 
         public static void AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
         {
-            AddAutoMapperClasses(services, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+            AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
-        public static void AddAutoMapper(this IServiceCollection services, IEnumerable<Type> profileAssemblyMarkerTypes)
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Type[] profileAssemblyMarkerTypes)
         {
-            AddAutoMapperClasses(services, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+            AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        }
+
+        public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Type> profileAssemblyMarkerTypes)
+        {
+            AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
 
-        private static void AddAutoMapperClasses(IServiceCollection services, IEnumerable<Assembly> assembliesToScan)
+        private static void AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
         {
+            additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan.SelectMany(a => a.ExportedTypes).ToArray();
@@ -58,6 +81,8 @@
 
             Mapper.Initialize(cfg =>
             {
+                additionalInitAction(cfg);
+
                 foreach (var profile in profiles)
                 {
                     cfg.AddProfile(profile);
