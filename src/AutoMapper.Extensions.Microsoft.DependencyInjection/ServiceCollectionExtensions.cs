@@ -32,7 +32,7 @@
                     // Only load assemblies that reference AutoMapper
                     .Where(lib =>
                         lib.Type.Equals("msbuildproject", StringComparison.OrdinalIgnoreCase) ||
-                        lib.Dependencies.Any(d => d.Name.Equals(AutoMapperAssembly.GetName().Name)))
+                        lib.Dependencies.Any(d => d.Name.StartsWith(AutoMapperAssembly.GetName().Name, StringComparison.OrdinalIgnoreCase)))
                     .SelectMany(lib => lib.GetDefaultAssemblyNames(dependencyContext)
                         .Select(Assembly.Load)));
         }
