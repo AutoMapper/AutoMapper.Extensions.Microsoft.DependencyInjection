@@ -30,7 +30,9 @@
             services.AddAutoMapper(additionalInitAction,
                 dependencyContext.RuntimeLibraries
                     // Only load assemblies that reference AutoMapper
-                    .Where(lib => lib.Dependencies.Any(d => d.Name.Equals(AutoMapperAssembly.GetName().Name)))
+                    .Where(lib =>
+                        lib.Type.Equals("msbuildproject", StringComparison.OrdinalIgnoreCase) ||
+                        lib.Dependencies.Any(d => d.Name.Equals(AutoMapperAssembly.GetName().Name)))
                     .SelectMany(lib => lib.GetDefaultAssemblyNames(dependencyContext)
                         .Select(Assembly.Load)));
         }
