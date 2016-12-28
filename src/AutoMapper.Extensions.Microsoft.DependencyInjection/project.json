@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.1.2",
+  "version": "1.2.0-alpha-*",
   "authors": [ "Jimmy Bogard" ],
   "copyright": "Copyright Jimmy Bogard",
   "description": "AutoMapper extensions for ASP.NET Core",
