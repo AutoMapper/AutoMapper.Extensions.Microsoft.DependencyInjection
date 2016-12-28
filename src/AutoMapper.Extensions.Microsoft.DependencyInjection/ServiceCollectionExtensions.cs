@@ -11,26 +11,11 @@
 
     public static class ServiceCollectionExtensions
     {
-        private static readonly Assembly AutoMapperAssembly = typeof(Mapper).GetTypeInfo().Assembly;
-
         private static readonly Action<IMapperConfigurationExpression> DefaultConfig = cfg => { };
 #if DEPENDENCY_MODEL
 
         private static HashSet<string> ReferenceAssemblies { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
         {
-            //"Microsoft.AspNetCore.Mvc",
-            //"Microsoft.AspNetCore.Mvc.Abstractions",
-            //"Microsoft.AspNetCore.Mvc.ApiExplorer",
-            //"Microsoft.AspNetCore.Mvc.Core",
-            //"Microsoft.AspNetCore.Mvc.Cors",
-            //"Microsoft.AspNetCore.Mvc.DataAnnotations",
-            //"Microsoft.AspNetCore.Mvc.Formatters.Json",
-            //"Microsoft.AspNetCore.Mvc.Formatters.Xml",
-            //"Microsoft.AspNetCore.Mvc.Localization",
-            //"Microsoft.AspNetCore.Mvc.Razor",
-            //"Microsoft.AspNetCore.Mvc.Razor.Host",
-            //"Microsoft.AspNetCore.Mvc.TagHelpers",
-            //"Microsoft.AspNetCore.Mvc.ViewFeatures",
             "AutoMapper"
         };
 
@@ -201,18 +186,21 @@
             additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
-            var allTypes = assembliesToScan.SelectMany(a => a.ExportedTypes).ToArray();
+            var allTypes = assembliesToScan
+                .Where(a => a.GetName().Name != nameof(AutoMapper))
+                .SelectMany(a => a.DefinedTypes)
+                .ToArray();
 
             var profiles =
                 allTypes
-                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t.GetTypeInfo()))
-                    .Where(t => !t.GetTypeInfo().IsAbstract);
+                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t))
+                    .Where(t => !t.IsAbstract);
 
             Mapper.Initialize(cfg =>
             {
                 additionalInitAction(cfg);
 
-                foreach (var profile in profiles)
+                foreach (var profile in profiles.Select(t => t.AsType()))
                 {
                     cfg.AddProfile(profile);
                 }
@@ -227,11 +215,11 @@
             foreach (var openType in openTypes)
             {
                 foreach (var type in allTypes
-                    .Where(t => t.GetTypeInfo().IsClass)
-                    .Where(t => !t.GetTypeInfo().IsAbstract)
-                    .Where(t => t.ImplementsGenericInterface(openType)))
+                    .Where(t => t.IsClass)
+                    .Where(t => !t.IsAbstract)
+                    .Where(t => t.AsType().ImplementsGenericInterface(openType)))
                 {
-                    services.AddTransient(type);
+                    services.AddTransient(type.AsType());
                 }
             }
 

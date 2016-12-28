@@ -29,7 +29,7 @@
 
     public abstract class AbstractProfile : Profile { }
 
-    public class Profile2 : Profile
+    internal class Profile2 : Profile
     {
         public Profile2()
         {
