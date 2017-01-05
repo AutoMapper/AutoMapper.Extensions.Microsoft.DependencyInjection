@@ -8,14 +8,14 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
     using Shouldly;
     using Xunit;
 
-    public class AssemblyResolutionTests
+    public class DependencyContextResolutionTests
     {
         private readonly IServiceProvider _provider;
 
-        public AssemblyResolutionTests()
+        public DependencyContextResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Source).GetTypeInfo().Assembly);
+            services.AddAutoMapper(_ => { }, DependencyContext.Load(typeof(DependencyContextResolutionTests).GetTypeInfo().Assembly));
             _provider = services.BuildServiceProvider();
         }
 

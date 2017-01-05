@@ -9,6 +9,14 @@
     using Microsoft.Extensions.DependencyModel;
 #endif
 
+    /// <summary>
+    /// Extensions to scan for AutoMapper classes and register them with the static/singleton Mapper class
+    /// - Finds <see cref="Profile"/> classes and initializes AutoMapper with them using <see cref="Mapper.Initialize(Action{AutoMapper.IMapperConfigurationExpression})"/>
+    /// - Scans for <see cref="ITypeConverter{TSource,TDestination}"/>, <see cref="IValueResolver{TSource,TDestination,TDestMember}"/> and <see cref="IMemberValueResolver{TSource,TDestination,TSourceMember,TDestMember}" /> implementations and registers them as <see cref="ServiceLifetime.Transient"/>
+    /// - Registers <see cref="Mapper.Configuration"/> as <see cref="ServiceLifetime.Singleton"/>
+    /// - Registers <see cref="IMapper"/> as <see cref="ServiceLifetime.Scoped"/> with a service factory of the scoped <see cref="IServiceProvider"/>
+    /// After calling AddAutoMapper you will have the static <see cref="Mapper"/> configuration initialized and you can use Mapper.Map and ProjectTo in your application code.
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
         private static readonly Action<IMapperConfigurationExpression> DefaultConfig = cfg => { };
