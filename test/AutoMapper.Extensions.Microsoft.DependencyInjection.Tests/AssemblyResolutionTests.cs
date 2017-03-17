@@ -26,17 +26,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
-        public void ShouldNotThrowForNullEntryAssembly()
-        {
-            DependencyContext ignored = null;
-            Action act = () => ignored = DependencyContext.Default;
-
-            act.ShouldNotThrow();
-            ignored.ShouldNotBeNull();
-        }
-
-
-        [Fact]
         public void ShouldConfigureProfiles()
         {
             _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(2);
