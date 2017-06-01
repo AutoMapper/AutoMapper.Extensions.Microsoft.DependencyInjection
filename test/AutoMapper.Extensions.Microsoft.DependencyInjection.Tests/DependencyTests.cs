@@ -25,5 +25,12 @@
 
             dest.ResolvedValue.ShouldBe(5);
         }
+
+        [Fact]
+        public void ShouldResolveTypedWithDependency()
+        {
+            var dest2 = _provider.GetService<IMapper<ConfigurationWith2>>().Map<Source2, Dest2>(new Source2());
+            dest2.ResolvedValue.ShouldBe(2);
+        }
     }
 }

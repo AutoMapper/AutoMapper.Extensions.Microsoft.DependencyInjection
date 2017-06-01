@@ -20,6 +20,7 @@ namespace TestApp
             services.AddAutoMapper(typeof(Source));
             var provider = services.BuildServiceProvider();
             provider.GetService<IMapper>();
+            provider.GetService<IMapper<ConfigurationWith2>>();
 
             foreach (var service in services)
             {
@@ -60,6 +61,21 @@ namespace TestApp
         {
             CreateMap<Source2, Dest2>()
                 .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing<DependencyResolver>());
+        }
+    }
+
+    internal class ConfigurationWith2 : MapperConfiguration
+    {
+        public ConfigurationWith2()
+            : base(Configure)
+        {
+            AssertConfigurationIsValid();
+        }
+
+        private static void Configure(IMapperConfigurationExpression cfg)
+        {
+            cfg.CreateMap<Source2, Dest2>()
+                .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing(src => 2));
         }
     }
 

@@ -197,7 +197,8 @@
             var profiles =
                 allTypes
                     .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t))
-                    .Where(t => !t.IsAbstract);
+                    .Where(t => !t.IsAbstract)
+                    .ToList();
 
             Mapper.Initialize(cfg =>
             {
@@ -208,6 +209,21 @@
                     cfg.AddProfile(profile);
                 }
             });
+
+            foreach (var profile in profiles.Select(t => t.AsType()))
+            {
+                services.AddSingleton(profile);
+            }
+
+            var configrations =
+                allTypes
+                    .Where(t => typeof(IConfigurationProvider).GetTypeInfo().IsAssignableFrom(t))
+                    .Where(t => !t.IsAbstract);
+
+            foreach (var configration in configrations.Select(x => x.AsType()))
+            {
+                services.AddSingleton(configration);
+            }
 
             var openTypes = new[]
             {
@@ -224,7 +240,9 @@
             }
 
             services.AddSingleton(Mapper.Configuration);
-            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+            return services
+                .AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService))
+                .AddScoped(typeof(IMapper<>), typeof(Mapper<>));
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
