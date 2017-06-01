@@ -38,6 +38,21 @@
         }
     }
 
+    internal class ConfigurationWith2 : MapperConfiguration
+    {
+        public ConfigurationWith2()
+            : base(Configure)
+        {
+            AssertConfigurationIsValid();
+        }
+
+        private static void Configure(IMapperConfigurationExpression cfg)
+        {
+            cfg.CreateMap<Source2, Dest2>()
+                .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing(src => 2));
+        }
+    }
+
     public class DependencyResolver : IValueResolver<object, object, int>
     {
         private readonly ISomeService _service;
