@@ -1,4 +1,6 @@
-﻿namespace AutoMapper
+﻿using System.Collections;
+
+namespace AutoMapper
 {
     using System;
     using System.Collections.Generic;
@@ -107,6 +109,9 @@
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
 
+        private static readonly IList<Action<IMapperConfigurationExpression>> StaticConfigurationExpressionActions =
+            new List<Action<IMapperConfigurationExpression>>();
+
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<MapperBuilder> builderAction)
         {
             if (services == null)
@@ -117,10 +122,30 @@
                 var builder = new MapperBuilder(services);
                 builderAction(builder);
 
-                foreach (var configAction in ((IMapperBuilder) builder).ConfigActions)
+                bool useStaticInitialization = ((IMapperBuilder) builder).UseStaticInitialization;
+                foreach (var configurationExpressionAction in ((IMapperBuilder) builder).ConfigurationExpressionActions)
                 {
-                    services.AddSingleton<IMapperConfigurationExpressionAction>(
-                        new MapperConfigurationExpressionAction(configAction));
+                    services.AddTransient<IMapperConfigurationExpressionAction>(
+                        sp => new MapperConfigurationExpressionAction(configurationExpressionAction));
+
+                    if (useStaticInitialization)
+                    {
+                        // lock the collection because running unit tests in parallel could concurrently access statics
+                        lock (((ICollection)StaticConfigurationExpressionActions).SyncRoot)
+                            StaticConfigurationExpressionActions.Add(configurationExpressionAction);
+                    }
+                }
+
+                if (useStaticInitialization)
+                {
+                    lock (((ICollection)StaticConfigurationExpressionActions).SyncRoot)
+                    {
+                        Mapper.Initialize(config =>
+                        {
+                            foreach (var staticConfigAction in StaticConfigurationExpressionActions)
+                                staticConfigAction(config);
+                        });
+                    }
                 }
             }
 

@@ -1,12 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
-namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
+﻿namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
-    using System.Reflection;
-    using global::Microsoft.Extensions.DependencyModel;
+    using global::Microsoft.Extensions.DependencyInjection;
     using Shouldly;
     using Xunit;
+    using System.Reflection;
 
     public class AssemblyResolutionTests
     {
@@ -15,7 +13,13 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public AssemblyResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Source).GetTypeInfo().Assembly);
+            services.AddAutoMapper(mapper =>
+            {
+                mapper.AddTypeConverters(typeof(Source).GetTypeInfo().Assembly);
+                mapper.AddValueResolvers(typeof(Source).GetTypeInfo().Assembly);
+                mapper.AddProfiles(typeof(Source).GetTypeInfo().Assembly);
+            });
+
             _provider = services.BuildServiceProvider();
         }
 
@@ -38,9 +42,21 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
-        public void ShouldInitializeStatically()
+        public void ShouldResolveValueResolver()
         {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
+            _provider.GetServices<SomeValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveMemberValueResolver()
+        {
+            _provider.GetServices<SomeMemberValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveTypeConverter()
+        {
+            _provider.GetService<SomeTypeConverter>().ShouldNotBeNull();
         }
     }
 }

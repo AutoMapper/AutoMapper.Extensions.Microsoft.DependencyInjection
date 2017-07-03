@@ -1,9 +1,7 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.DependencyInjection;
-
-namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
+﻿namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
+    using global::Microsoft.Extensions.DependencyInjection;
     using Shouldly;
     using Xunit;
 
@@ -14,11 +12,11 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public TypeResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(builder =>
+            services.AddAutoMapper(mapper =>
             {
-                builder.AddTypeConverters(typeof(Source));
-                builder.AddValueResolvers(typeof(Source));
-                builder.AddProfiles(typeof(Source));
+                mapper.AddTypeConverters(typeof(Source));
+                mapper.AddValueResolvers(typeof(Source));
+                mapper.AddProfiles(typeof(Source));
             });
 
             _provider = services.BuildServiceProvider();
@@ -58,12 +56,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveTypeConverter()
         {
             _provider.GetService<SomeTypeConverter>().ShouldNotBeNull();
-        }
-
-        [Fact]
-        public void ShouldInitializeStatically()
-        {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
         }
     }
 }

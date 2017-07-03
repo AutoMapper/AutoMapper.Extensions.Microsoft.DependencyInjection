@@ -8,6 +8,8 @@ namespace AutoMapper
     {
         IServiceCollection Services { get; }
 
-        IList<Action<IMapperConfigurationExpression>> ConfigActions { get; }
+        IList<Action<IMapperConfigurationExpression>> ConfigurationExpressionActions { get; }
+
+        bool UseStaticInitialization { get; }
     }
 }
