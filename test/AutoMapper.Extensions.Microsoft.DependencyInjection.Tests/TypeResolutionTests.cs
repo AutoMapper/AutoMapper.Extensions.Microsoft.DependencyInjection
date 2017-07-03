@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
@@ -13,7 +14,13 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public TypeResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Source));
+            services.AddAutoMapper(builder =>
+            {
+                builder.AddTypeConverters(typeof(Source));
+                builder.AddValueResolvers(typeof(Source));
+                builder.AddProfiles(typeof(Source));
+            });
+
             _provider = services.BuildServiceProvider();
         }
 
@@ -33,6 +40,24 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveMapper()
         {
             _provider.GetService<IMapper>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveValueResolver()
+        {
+            _provider.GetServices<SomeValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveMemberValueResolver()
+        {
+            _provider.GetServices<SomeMemberValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveTypeConverter()
+        {
+            _provider.GetService<SomeTypeConverter>().ShouldNotBeNull();
         }
 
         [Fact]

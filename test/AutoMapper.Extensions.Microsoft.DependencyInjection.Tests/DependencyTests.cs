@@ -13,7 +13,12 @@
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
-            services.AddAutoMapper(typeof(Source), typeof(Profile));
+            services.AddAutoMapper(builder =>
+            {
+                builder.AddValueResolvers(typeof(Source));
+                builder.AddProfiles(typeof(Source));
+
+            });
             _provider = services.BuildServiceProvider();
         }
 
