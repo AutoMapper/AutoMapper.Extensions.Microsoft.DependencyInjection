@@ -29,7 +29,7 @@
 
     public abstract class AbstractProfile : Profile { }
 
-    internal class Profile2 : Profile
+    public class Profile2 : Profile
     {
         public Profile2()
         {
@@ -68,5 +68,29 @@
         }
 
         public int Modify(int value) => value + _value;
+    }
+
+    public class SomeValueResolver : IValueResolver<object, object, int>
+    {
+        public int Resolve(object source, object destination, int destMember, ResolutionContext context)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    public class SomeMemberValueResolver : IMemberValueResolver<object, object, object, object>
+    {
+        public object Resolve(object source, object destination, object sourceMember, object destMember, ResolutionContext context)
+        {
+            throw new System.NotImplementedException();
+        }
+    }
+
+    public class SomeTypeConverter : ITypeConverter<object, object>
+    {
+        public object Convert(object source, object destination, ResolutionContext context)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

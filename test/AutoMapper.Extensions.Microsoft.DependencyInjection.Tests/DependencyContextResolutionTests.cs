@@ -1,22 +1,27 @@
-﻿namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
+﻿using System.Reflection;
+using Microsoft.Extensions.DependencyModel;
+
+namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
     using global::Microsoft.Extensions.DependencyInjection;
     using Shouldly;
     using Xunit;
 
-    public class TypeResolutionTests
+    public class DependencyContextResolutionTests
     {
         private readonly IServiceProvider _provider;
 
-        public TypeResolutionTests()
+        public DependencyContextResolutionTests()
         {
+            var dependencyContext = DependencyContext.Load(typeof(DependencyContextResolutionTests).GetTypeInfo().Assembly);
+
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(mapper =>
             {
-                mapper.AddTypeConverters(typeof(Source));
-                mapper.AddValueResolvers(typeof(Source));
-                mapper.AddProfiles(typeof(Source));
+                mapper.AddTypeConverters(dependencyContext);
+                mapper.AddValueResolvers(dependencyContext);
+                mapper.AddProfiles(dependencyContext);
             });
 
             _provider = services.BuildServiceProvider();
