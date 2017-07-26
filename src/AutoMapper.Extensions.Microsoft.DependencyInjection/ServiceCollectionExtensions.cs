@@ -40,6 +40,13 @@
         {
             return services.AddAutoMapper(additionalInitAction, GetCandidateAssemblies(dependencyContext));
         }
+        
+        public static IServiceCollection AssertAutoMapperConfigurationIsValid(this IServiceCollection services)
+        {
+            Mapper.AssertConfigurationIsValid();
+
+            return services;
+        }
 
         private static IEnumerable<Assembly> GetCandidateAssemblies(DependencyContext dependencyContext)
         {
