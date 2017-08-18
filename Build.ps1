@@ -40,6 +40,7 @@ $revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUI
 $suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
 $commitHash = $(git rev-parse --short HEAD)
 $buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
+$versionSuffix = @{ $true = "--version-suffix=$($suffix)"; $false = ""}[$suffix -ne ""]
 
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix" 
@@ -59,6 +60,6 @@ foreach ($test in ls test/*.Tests) {
     Pop-Location
 }
 
-exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build --version-suffix=$suffix }
+exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build $versionSuffix }
 
 Pop-Location
