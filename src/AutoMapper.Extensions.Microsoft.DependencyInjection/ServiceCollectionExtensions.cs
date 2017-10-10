@@ -69,10 +69,8 @@
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
-            var profiles =
-                allTypes
-                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t))
-                    .Where(t => !t.IsAbstract);
+            var profiles = allTypes
+                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract);
 
             Mapper.Initialize(cfg =>
             {
@@ -91,9 +89,9 @@
                 typeof(ITypeConverter<,>)
             };
             foreach (var type in openTypes.SelectMany(openType => allTypes
-                .Where(t => t.IsClass)
-                .Where(t => !t.IsAbstract)
-                .Where(t => t.AsType().ImplementsGenericInterface(openType))))
+                .Where(t => t.IsClass 
+                    && !t.IsAbstract 
+                    && t.AsType().ImplementsGenericInterface(openType))))
             {
                 services.AddTransient(type.AsType());
             }
