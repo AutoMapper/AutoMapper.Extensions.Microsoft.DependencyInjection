@@ -34,6 +34,30 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         {
             _provider.GetService<IMapper>().ShouldNotBeNull();
         }
+
+        [Fact]
+        public void ShouldResolveMappingAction()
+        {
+            _provider.GetService<FooMappingAction>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveValueResolver()
+        {
+            _provider.GetService<FooValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveMemberValueResolver()
+        {
+            _provider.GetService<FooMemberValueResolver>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldResolveTypeConverter()
+        {
+            _provider.GetService<FooTypeConverter>().ShouldNotBeNull();
+        }
     }
 
     public class TypeResolutionTests_ForStaticConfig

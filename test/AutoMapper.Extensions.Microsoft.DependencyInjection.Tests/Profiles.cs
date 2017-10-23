@@ -69,4 +69,33 @@
 
         public int Modify(int value) => value + _value;
     }
+
+    internal class FooMappingAction : IMappingAction<object, object>
+    {
+        public void Process(object source, object destination) { }
+    }
+
+    internal class FooValueResolver: IValueResolver<object, object, object>
+    {
+        public object Resolve(object source, object destination, object destMember, ResolutionContext context)
+        {
+            return null;
+        }
+    }
+
+    internal class FooMemberValueResolver : IMemberValueResolver<object, object, object, object>
+    {
+        public object Resolve(object source, object destination, object sourceMember, object destMember, ResolutionContext context)
+        {
+            return null;
+        }
+    }
+
+    internal class FooTypeConverter : ITypeConverter<object, object>
+    {
+        public object Convert(object source, object destination, ResolutionContext context)
+        {
+            return null;
+        }
+    }
 }
