@@ -43,6 +43,9 @@
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assemblies) 
             => AddAutoMapperClasses(services, additionalInitAction, assemblies);
 
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
+            => AddAutoMapperClasses(services, null, assemblies);
+
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
         {
             return AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
@@ -69,10 +72,8 @@
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
-            var profiles =
-                allTypes
-                    .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t))
-                    .Where(t => !t.IsAbstract);
+            var profiles = allTypes
+                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract);
 
             Mapper.Initialize(cfg =>
             {
@@ -92,9 +93,9 @@
                 typeof(IMappingAction<,>)
             };
             foreach (var type in openTypes.SelectMany(openType => allTypes
-                .Where(t => t.IsClass)
-                .Where(t => !t.IsAbstract)
-                .Where(t => t.AsType().ImplementsGenericInterface(openType))))
+                .Where(t => t.IsClass 
+                    && !t.IsAbstract 
+                    && t.AsType().ImplementsGenericInterface(openType))))
             {
                 services.AddTransient(type.AsType());
             }
