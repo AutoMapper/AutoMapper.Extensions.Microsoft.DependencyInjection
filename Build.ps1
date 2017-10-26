@@ -60,6 +60,6 @@ foreach ($test in ls test/*.Tests) {
     Pop-Location
 }
 
-exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build --version-suffix=$suffix  }
+exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build $versionSuffix }
 
 Pop-Location
