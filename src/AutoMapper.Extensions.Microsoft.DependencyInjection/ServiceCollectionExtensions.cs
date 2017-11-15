@@ -9,12 +9,14 @@
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register them with the static/singleton Mapper class
-    /// - Finds <see cref="Profile"/> classes and initializes AutoMapper with them using <see cref="Mapper.Initialize(Action{AutoMapper.IMapperConfigurationExpression})"/>
+    /// - Finds <see cref="Profile"/> classes and initializes a new Mapper with them
     /// - Scans for <see cref="ITypeConverter{TSource,TDestination}"/>, <see cref="IValueResolver{TSource,TDestination,TDestMember}"/>, <see cref="IMemberValueResolver{TSource,TDestination,TSourceMember,TDestMember}" /> and <see cref="IMappingAction{TSource,TDestination}"/> implementations and registers them as <see cref="ServiceLifetime.Transient"/>
-    /// - Registers <see cref="Mapper.Configuration"/> as <see cref="ServiceLifetime.Singleton"/>
-    /// - Registers <see cref="IMapper"/> as <see cref="ServiceLifetime.Scoped"/> with a service factory of the scoped <see cref="IServiceProvider"/>
-    /// After calling AddAutoMapper you will have the static <see cref="Mapper"/> configuration initialized and you can use Mapper.Map and ProjectTo in your application code.
+    /// - Registers the created <see cref="MapperConfiguration"/> as <see cref="ServiceLifetime.Singleton"/>
+    /// - Registers the created <see cref="IMapper"/> as <see cref="ServiceLifetime.Singleton"/> with a service factory of the scoped <see cref="IServiceProvider"/>
     /// </summary>
+    /// <remarks>
+    /// After calling AddAutoMapper you will not have the static <see cref="Mapper"/> configuration initialized. You must use the <see cref="IMapper"/> provided via DI to perform mapping.
+    /// </remarks>
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddAutoMapper(this IServiceCollection services)
@@ -75,7 +77,7 @@
             var profiles = allTypes
                 .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract);
 
-            Mapper.Initialize(cfg =>
+            var config = new MapperConfiguration(cfg =>
             {
                 additionalInitAction(cfg);
 
@@ -100,8 +102,10 @@
                 services.AddTransient(type.AsType());
             }
 
-            services.AddSingleton(Mapper.Configuration);
-            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+            services.AddSingleton<IConfigurationProvider>(config);
+            services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+
+            return services;
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)

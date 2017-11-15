@@ -24,6 +24,20 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
+        public void ShouldRegisterConfigurationAsSingleton()
+        {
+            using (var scope = _provider.CreateScope())
+            {
+                var first = _provider.GetService<IConfigurationProvider>();
+                var second = _provider.GetService<IConfigurationProvider>();
+                var third = scope.ServiceProvider.GetService<IConfigurationProvider>();
+
+                first.ShouldBeSameAs(second);
+                first.ShouldBeSameAs(third);
+            }
+        }
+
+        [Fact]
         public void ShouldConfigureProfiles()
         {
             _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(2);
@@ -33,6 +47,21 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveMapper()
         {
             _provider.GetService<IMapper>().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void ShouldRegisterMapperAsScoped()
+        {
+            using (var outerScope = _provider.CreateScope())
+            using (var innerScope = outerScope.ServiceProvider.CreateScope())
+            {
+                var first = outerScope.ServiceProvider.GetService<IMapper>();
+                var second = outerScope.ServiceProvider.GetService<IMapper>();
+                var third = innerScope.ServiceProvider.GetService<IMapper>();
+
+                first.ShouldBeSameAs(second);
+                first.ShouldNotBeSameAs(third);
+            }
         }
 
         [Fact]
@@ -57,24 +86,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveTypeConverter()
         {
             _provider.GetService<FooTypeConverter>().ShouldNotBeNull();
-        }
-    }
-
-    public class TypeResolutionTests_ForStaticConfig
-    {
-        private readonly IServiceProvider _provider;
-
-        public TypeResolutionTests_ForStaticConfig()
-        {
-            IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Source));
-            _provider = services.BuildServiceProvider();
-        }
-
-        [Fact]
-        public void ShouldInitializeStatically()
-        {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
         }
     }
 }

@@ -26,6 +26,20 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
+        public void ShouldRegisterConfigurationAsSingleton()
+        {
+            using (var scope = _provider.CreateScope())
+            {
+                var first = _provider.GetService<IConfigurationProvider>();
+                var second = _provider.GetService<IConfigurationProvider>();
+                var third = scope.ServiceProvider.GetService<IConfigurationProvider>();
+
+                first.ShouldBeSameAs(second);
+                first.ShouldBeSameAs(third);
+            }
+        }
+        
+        [Fact]
         public void ShouldConfigureProfiles()
         {
             _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(2);
@@ -38,9 +52,18 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
-        public void ShouldInitializeStatically()
+        public void ShouldRegisterMapperAsScoped()
         {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
+            using (var outerScope = _provider.CreateScope())
+            using (var innerScope = outerScope.ServiceProvider.CreateScope())
+            {
+                var first = outerScope.ServiceProvider.GetService<IMapper>();
+                var second = outerScope.ServiceProvider.GetService<IMapper>();
+                var third = innerScope.ServiceProvider.GetService<IMapper>();
+
+                first.ShouldBeSameAs(second);
+                first.ShouldNotBeSameAs(third);
+            }
         }
     }
 }
