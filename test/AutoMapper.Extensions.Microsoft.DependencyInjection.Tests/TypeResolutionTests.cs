@@ -66,6 +66,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
         public TypeResolutionTests_ForStaticConfig()
         {
+            ServiceCollectionExtensions.UseStaticRegistration = true;
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source));
             _provider = services.BuildServiceProvider();

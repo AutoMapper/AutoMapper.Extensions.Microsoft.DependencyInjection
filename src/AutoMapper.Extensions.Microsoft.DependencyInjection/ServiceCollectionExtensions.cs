@@ -14,9 +14,16 @@
     /// - Registers <see cref="Mapper.Configuration"/> as <see cref="ServiceLifetime.Singleton"/>
     /// - Registers <see cref="IMapper"/> as <see cref="ServiceLifetime.Scoped"/> with a service factory of the scoped <see cref="IServiceProvider"/>
     /// After calling AddAutoMapper you will have the static <see cref="Mapper"/> configuration initialized and you can use Mapper.Map and ProjectTo in your application code.
+    /// To use instance-based registration instead of the static <see cref="Mapper"/> class, set the <see cref="UseStaticRegistration"/> to false.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Use the static registration method of Mapper.Initialize. Defaults to true.
+        /// When false, an instance of a MapperConfiguration object is registered instead.
+        /// </summary>
+        public static bool UseStaticRegistration { get; set; } = true;
+
         public static IServiceCollection AddAutoMapper(this IServiceCollection services)
         {
             return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies());
@@ -73,9 +80,11 @@
                 .ToArray();
 
             var profiles = allTypes
-                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract);
+                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract)
+                .ToArray();
 
-            Mapper.Initialize(cfg =>
+
+            void ConfigAction(IMapperConfigurationExpression cfg)
             {
                 additionalInitAction(cfg);
 
@@ -83,7 +92,18 @@
                 {
                     cfg.AddProfile(profile);
                 }
-            });
+            }
+
+            IConfigurationProvider config;
+            if (UseStaticRegistration)
+            {
+                Mapper.Initialize(ConfigAction);
+                config = Mapper.Configuration;
+            }
+            else
+            {
+                config = new MapperConfiguration(ConfigAction);
+            }
 
             var openTypes = new[]
             {
@@ -100,7 +120,7 @@
                 services.AddTransient(type.AsType());
             }
 
-            services.AddSingleton(Mapper.Configuration);
+            services.AddSingleton(config);
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
 

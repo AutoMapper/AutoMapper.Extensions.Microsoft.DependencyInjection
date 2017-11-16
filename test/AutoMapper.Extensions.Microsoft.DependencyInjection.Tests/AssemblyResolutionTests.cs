@@ -14,6 +14,8 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
         public AssemblyResolutionTests()
         {
+            ServiceCollectionExtensions.UseStaticRegistration = true;
+
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source).GetTypeInfo().Assembly);
             _provider = services.BuildServiceProvider();
