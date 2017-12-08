@@ -14,6 +14,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
             ServiceCollectionExtensions.UseStaticRegistration = false;
 
             IServiceCollection services = new ServiceCollection();
+            services.AddTransient<IProfile3Dependency, Profile3Dependency>();
             services.AddAutoMapper();
 
             var serviceProvider = services.BuildServiceProvider();

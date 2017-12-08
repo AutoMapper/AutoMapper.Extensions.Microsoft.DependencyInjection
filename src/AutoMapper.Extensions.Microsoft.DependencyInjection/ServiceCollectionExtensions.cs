@@ -68,7 +68,6 @@
             return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
-
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
         {
             additionalInitAction = additionalInitAction ?? DefaultConfig;
@@ -79,32 +78,87 @@
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
+            Func<TypeInfo, bool> canBeInstanciated = t =>
+            {
+                if (!UseStaticRegistration)
+                {
+                    return true;
+                }
+
+                var hasParameterlessConstructor = t
+                    .GetConstructors()
+                    .FirstOrDefault(c => c.GetParameters().Count() == 0) != null;
+                return hasParameterlessConstructor;
+            };
+
             var profiles = allTypes
-                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => 
+                    typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && 
+                    !t.IsAbstract && canBeInstanciated(t)
+                )
                 .ToArray();
 
-
-            void ConfigAction(IMapperConfigurationExpression cfg)
-            {
-                additionalInitAction(cfg);
-
-                foreach (var profile in profiles.Select(t => t.AsType()))
-                {
-                    cfg.AddProfile(profile);
-                }
-            }
-
-            IConfigurationProvider config;
             if (UseStaticRegistration)
             {
+                // No support for Profile DI when UseStaticRegistration is true 
+                // because there is no IServiceProvider available here.
+                void ConfigAction(IMapperConfigurationExpression cfg)
+                {
+                    additionalInitAction(cfg);
+
+                    foreach (var profile in profiles.Select(t => t.AsType()))
+                    {
+                        cfg.AddProfile(profile);
+                    }
+                }
+
                 Mapper.Initialize(ConfigAction);
-                config = Mapper.Configuration;
+                services.AddSingleton(Mapper.Configuration);
             }
             else
             {
-                config = new MapperConfiguration(ConfigAction);
+                // Register profiles with the DI container
+                profiles
+                    .ToList()
+                    .ForEach(t =>
+                    {
+                        // Register the service as itself
+                        // This is what allows the service provider to 
+                        // create the Profile instance, see next instruction.
+                        services.AddTransient(t);
+
+                        // Register the service as a Profile using
+                        // the previous registration to create it.
+                        // This is what will be used in the MapperConfiguration's 
+                        // initialization.
+                        services
+                            .AddTransient(serviceProvider =>
+                            {
+                                var obj = serviceProvider.GetService(t);
+                                var profile = obj as Profile;
+                                return profile;
+                            });
+                    });
+
+                // Create the configuration, using previously registered profiles, 
+                // enabling constructor injection.
+                services.AddSingleton<IConfigurationProvider>(serviceProvider =>
+                {
+                    return new MapperConfiguration(cfg =>
+                    {
+                        additionalInitAction(cfg);
+                        serviceProvider
+                            .GetServices<Profile>()
+                            .ToList()
+                            .ForEach(profile =>
+                            {
+                                cfg.AddProfile(profile);
+                            });
+                    });
+                });
             }
 
+            // Register open types
             var openTypes = new[]
             {
                 typeof(IValueResolver<,,>),
@@ -113,14 +167,14 @@
                 typeof(IMappingAction<,>)
             };
             foreach (var type in openTypes.SelectMany(openType => allTypes
-                .Where(t => t.IsClass 
-                    && !t.IsAbstract 
+                .Where(t => t.IsClass
+                    && !t.IsAbstract
                     && t.AsType().ImplementsGenericInterface(openType))))
             {
                 services.AddTransient(type.AsType());
             }
 
-            services.AddSingleton(config);
+            // Register the IMapper itself
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
 
