@@ -105,13 +105,16 @@
                     .ToList()
                     .ForEach(t =>
                     {
-                    // Register the service as itself
-                    services.AddTransient(t);
+                        // Register the service as itself
+                        // This is what allows the service provider to 
+                        // create the Profile instance, see next instruction.
+                        services.AddTransient(t);
 
-                    // Register the service as a Profile using
-                    // the previous registration to create it.
-                    // This is what will build the profiles later.
-                    services
+                        // Register the service as a Profile using
+                        // the previous registration to create it.
+                        // This is what will be used in the MapperConfiguration's 
+                        // initialization.
+                        services
                             .AddTransient(serviceProvider =>
                             {
                                 var obj = serviceProvider.GetService(t);
@@ -123,6 +126,8 @@
 
             if (UseStaticRegistration)
             {
+                // No support for Profile DI when UseStaticRegistration is true 
+                // because there is no IServiceProvider available here.
                 void ConfigAction(IMapperConfigurationExpression cfg)
                 {
                     additionalInitAction(cfg);
@@ -138,8 +143,8 @@
             }
             else
             {
-                // Create the configuration, using scaned profiles that are now
-                // built using the IServiceProvider, allowing constructor injection.
+                // Create the configuration, using previously registered profiles, 
+                // enabling constructor injection.
                 services.AddSingleton<IConfigurationProvider>(serviceProvider =>
                 {
                     return new MapperConfiguration(cfg =>
