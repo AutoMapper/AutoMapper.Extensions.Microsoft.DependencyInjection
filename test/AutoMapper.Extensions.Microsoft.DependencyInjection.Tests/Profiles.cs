@@ -19,6 +19,14 @@
         public int ResolvedValue { get; set; }
     }
 
+    public class Source3
+    {
+    }
+
+    public class Dest3
+    {
+    }
+
     public class Profile1 : Profile
     {
         public Profile1()
@@ -98,4 +106,16 @@
             return null;
         }
     }
+
+    public class Profile3 : Profile
+    {
+        public Profile3(IProfile3Dependency profile3Dependency)
+        {
+            if (profile3Dependency == null) { throw new System.ArgumentNullException(nameof(profile3Dependency)); }
+            CreateMap<Source3, Dest3>();
+        }
+    }
+
+    public interface IProfile3Dependency { }
+    public class Profile3Dependency : IProfile3Dependency { }
 }

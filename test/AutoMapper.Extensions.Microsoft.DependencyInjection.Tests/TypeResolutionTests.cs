@@ -13,6 +13,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public TypeResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
+            services.AddTransient<IProfile3Dependency, Profile3Dependency>();
             services.AddAutoMapper(typeof(Source));
             _provider = services.BuildServiceProvider();
         }
@@ -26,7 +27,8 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void ShouldConfigureProfiles()
         {
-            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(2);
+            var expectedNumberOfProfile = ServiceCollectionExtensions.UseStaticRegistration ? 2 : 3;
+            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(expectedNumberOfProfile);
         }
 
         [Fact]
@@ -68,6 +70,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         {
             ServiceCollectionExtensions.UseStaticRegistration = true;
             IServiceCollection services = new ServiceCollection();
+            services.AddTransient<IProfile3Dependency, Profile3Dependency>();
             services.AddAutoMapper(typeof(Source));
             _provider = services.BuildServiceProvider();
         }

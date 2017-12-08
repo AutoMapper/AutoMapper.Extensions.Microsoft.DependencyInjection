@@ -17,6 +17,7 @@ namespace TestApp
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
+            services.AddTransient<IProfile3Dependency, Profile3Dependency>();
             services.AddAutoMapper(typeof(Source));
             var provider = services.BuildServiceProvider();
             provider.GetService<IMapper>();
@@ -46,6 +47,14 @@ namespace TestApp
         public int ResolvedValue { get; set; }
     }
 
+    public class Source3
+    {
+    }
+
+    public class Dest3
+    {
+    }
+
     public class Profile1 : Profile
     {
         public Profile1()
@@ -62,6 +71,18 @@ namespace TestApp
                 .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing<DependencyResolver>());
         }
     }
+
+    public class Profile3 : Profile
+    {
+        public Profile3(IProfile3Dependency profile3Dependency)
+        {
+            if (profile3Dependency == null) { throw new ArgumentNullException(nameof(profile3Dependency)); }
+            CreateMap<Source3, Dest3>();
+        }
+    }
+
+    public interface IProfile3Dependency { }
+    public class Profile3Dependency : IProfile3Dependency { }
 
     public class DependencyResolver : IValueResolver<object, object, int>
     {

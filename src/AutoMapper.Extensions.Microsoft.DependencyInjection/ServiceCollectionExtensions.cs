@@ -68,12 +68,107 @@
             return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
-
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
         {
             additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
+            //if (UseStaticRegistration)
+            //{
+            //    return OldAddAutoMapperClasses(services, additionalInitAction, assembliesToScan);
+            //}
+
+            var allTypes = assembliesToScan
+                .Where(a => a.GetName().Name != nameof(AutoMapper))
+                .SelectMany(a => a.DefinedTypes)
+                .ToArray();
+
+            Func<TypeInfo, bool> canBeInstanciated = t =>
+            {
+                if (!UseStaticRegistration)
+                {
+                    return true;
+                }
+
+                var hasParameterlessConstructor = t
+                    .GetConstructors()
+                    .FirstOrDefault(c => c.GetParameters().Count() == 0) != null;
+                return hasParameterlessConstructor;
+            };
+
+            var profiles = allTypes
+                .Where(t => 
+                    typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && 
+                    !t.IsAbstract && canBeInstanciated(t)
+                )
+                .ToArray();
+
+            // Register profiles with the DI container
+            if (!UseStaticRegistration)
+            {
+                profiles
+                    .ToList()
+                    .ForEach(t =>
+                    {
+                    // Register the service as itself
+                    services.AddTransient(t);
+
+                    // Register the service as a Profile using
+                    // the previous registration to create it.
+                    // This is what will build the profiles later.
+                    services
+                            .AddTransient(serviceProvider =>
+                            {
+                                var obj = serviceProvider.GetService(t);
+                                var profile = obj as Profile;
+                                return profile;
+                            });
+                    });
+            }
+
+            if (UseStaticRegistration)
+            {
+                void ConfigAction(IMapperConfigurationExpression cfg)
+                {
+                    additionalInitAction(cfg);
+
+                    foreach (var profile in profiles.Select(t => t.AsType()))
+                    {
+                        cfg.AddProfile(profile);
+                    }
+                }
+
+                Mapper.Initialize(ConfigAction);
+                services.AddSingleton(Mapper.Configuration);
+            }
+            else
+            {
+                // Create the configuration, using scaned profiles that are now
+                // built using the IServiceProvider, allowing constructor injection.
+                services.AddSingleton<IConfigurationProvider>(serviceProvider =>
+                {
+                    return new MapperConfiguration(cfg =>
+                    {
+                        additionalInitAction(cfg);
+                        serviceProvider
+                            .GetServices<Profile>()
+                            .ToList()
+                            .ForEach(profile =>
+                            {
+                                cfg.AddProfile(profile);
+                            });
+                    });
+                });
+            }
+
+            RegisterOpenTypes(services, allTypes);
+
+            // Add the IMapper itself
+            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+        }
+
+        private static IServiceCollection OldAddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
+        {
             var allTypes = assembliesToScan
                 .Where(a => a.GetName().Name != nameof(AutoMapper))
                 .SelectMany(a => a.DefinedTypes)
@@ -94,17 +189,25 @@
                 }
             }
 
-            IConfigurationProvider config;
-            if (UseStaticRegistration)
-            {
-                Mapper.Initialize(ConfigAction);
-                config = Mapper.Configuration;
-            }
-            else
-            {
-                config = new MapperConfiguration(ConfigAction);
-            }
+            //IConfigurationProvider config;
+            //if (UseStaticRegistration)
+            //{
+            Mapper.Initialize(ConfigAction);
+            IConfigurationProvider config = Mapper.Configuration;
+            //}
+            //else
+            //{
+            //    config = new MapperConfiguration(ConfigAction);
+            //}
 
+            RegisterOpenTypes(services, allTypes);
+
+            services.AddSingleton(config);
+            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+        }
+
+        private static void RegisterOpenTypes(IServiceCollection services, TypeInfo[] allTypes)
+        {
             var openTypes = new[]
             {
                 typeof(IValueResolver<,,>),
@@ -113,15 +216,12 @@
                 typeof(IMappingAction<,>)
             };
             foreach (var type in openTypes.SelectMany(openType => allTypes
-                .Where(t => t.IsClass 
-                    && !t.IsAbstract 
+                .Where(t => t.IsClass
+                    && !t.IsAbstract
                     && t.AsType().ImplementsGenericInterface(openType))))
             {
                 services.AddTransient(type.AsType());
             }
-
-            services.AddSingleton(config);
-            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
