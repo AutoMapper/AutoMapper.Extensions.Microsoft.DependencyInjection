@@ -98,9 +98,26 @@
                 )
                 .ToArray();
 
-            // Register profiles with the DI container
-            if (!UseStaticRegistration)
+            if (UseStaticRegistration)
             {
+                // No support for Profile DI when UseStaticRegistration is true 
+                // because there is no IServiceProvider available here.
+                void ConfigAction(IMapperConfigurationExpression cfg)
+                {
+                    additionalInitAction(cfg);
+
+                    foreach (var profile in profiles.Select(t => t.AsType()))
+                    {
+                        cfg.AddProfile(profile);
+                    }
+                }
+
+                Mapper.Initialize(ConfigAction);
+                services.AddSingleton(Mapper.Configuration);
+            }
+            else
+            {
+                // Register profiles with the DI container
                 profiles
                     .ToList()
                     .ForEach(t =>
@@ -122,27 +139,7 @@
                                 return profile;
                             });
                     });
-            }
 
-            if (UseStaticRegistration)
-            {
-                // No support for Profile DI when UseStaticRegistration is true 
-                // because there is no IServiceProvider available here.
-                void ConfigAction(IMapperConfigurationExpression cfg)
-                {
-                    additionalInitAction(cfg);
-
-                    foreach (var profile in profiles.Select(t => t.AsType()))
-                    {
-                        cfg.AddProfile(profile);
-                    }
-                }
-
-                Mapper.Initialize(ConfigAction);
-                services.AddSingleton(Mapper.Configuration);
-            }
-            else
-            {
                 // Create the configuration, using previously registered profiles, 
                 // enabling constructor injection.
                 services.AddSingleton<IConfigurationProvider>(serviceProvider =>
