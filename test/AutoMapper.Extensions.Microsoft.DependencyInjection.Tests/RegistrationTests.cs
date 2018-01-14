@@ -30,5 +30,15 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
                 // Success if the mapper has not been initialized anyway
             }
         }
+
+        [Fact]
+        public void Register_with_profile_via_generic()
+        {
+            IServiceCollection services = new ServiceCollection();
+            services.AddAutoMapper<Profile1>();
+            IServiceProvider sp = services.BuildServiceProvider();
+            var mapper = sp.GetService<IMapper>();
+            Assert.NotNull(mapper.Map<Dest>(new Source()));
+        }     
     }
 }

@@ -29,6 +29,16 @@
             return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies());
         }
 
+        public static IServiceCollection AddAutoMapper<TProfile>(this IServiceCollection services) where TProfile: Profile
+        {
+            return  services.AddAutoMapper<TProfile>(null);
+        }
+
+        public static IServiceCollection AddAutoMapper<TProfile>(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction) where TProfile : Profile
+        {
+            return AddAutoMapperClasses(services, additionalInitAction, new Type[] { typeof(TProfile) });
+        }         
+
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction)
         {
             return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
@@ -68,10 +78,8 @@
             return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
-
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
         {
-            additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan
@@ -81,14 +89,36 @@
 
             var profiles = allTypes
                 .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract)
-                .ToArray();
+                .Select(t => t.AsType());
 
+            var openTypes = new[]
+            {
+                typeof(IValueResolver<,,>),
+                typeof(IMemberValueResolver<,,,>),
+                typeof(ITypeConverter<,>),
+                typeof(IMappingAction<,>)
+            };
+
+            foreach (var type in openTypes.SelectMany(openType => allTypes
+                .Where(t => t.IsClass
+                    && !t.IsAbstract
+                    && t.AsType().ImplementsGenericInterface(openType))))
+            {
+                services.AddTransient(type.AsType());
+            }
+
+            return AddAutoMapperClasses(services, additionalInitAction, profiles);
+        }
+
+        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Type> profiles)
+        {
+            additionalInitAction = additionalInitAction ?? DefaultConfig;
 
             void ConfigAction(IMapperConfigurationExpression cfg)
             {
                 additionalInitAction(cfg);
 
-                foreach (var profile in profiles.Select(t => t.AsType()))
+                foreach (var profile in profiles)
                 {
                     cfg.AddProfile(profile);
                 }
@@ -103,22 +133,7 @@
             else
             {
                 config = new MapperConfiguration(ConfigAction);
-            }
-
-            var openTypes = new[]
-            {
-                typeof(IValueResolver<,,>),
-                typeof(IMemberValueResolver<,,,>),
-                typeof(ITypeConverter<,>),
-                typeof(IMappingAction<,>)
-            };
-            foreach (var type in openTypes.SelectMany(openType => allTypes
-                .Where(t => t.IsClass 
-                    && !t.IsAbstract 
-                    && t.AsType().ImplementsGenericInterface(openType))))
-            {
-                services.AddTransient(type.AsType());
-            }
+            }            
 
             services.AddSingleton(config);
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
