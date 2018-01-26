@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Reflection;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyModel;
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register them with the static/singleton Mapper class
@@ -24,19 +23,10 @@
         /// </summary>
         public static bool UseStaticRegistration { get; set; } = true;
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services)
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector = null, ServiceLifetime mapperLifetime = ServiceLifetime.Scoped)
         {
-            return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies());
-        }
-
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction)
-        {
-            return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
-        }
-
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, DependencyContext dependencyContext)
-        {
-            return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
+            return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies(), serviceLifetimeSelector, mapperLifetime);
         }
 
         private static readonly Action<IMapperConfigurationExpression> DefaultConfig = cfg => { };
@@ -44,32 +34,49 @@
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Assembly[] assemblies) 
+        public static IServiceCollection AddAutoMapper(
+            this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, additionalInitAction, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assemblies) 
-            => AddAutoMapperClasses(services, additionalInitAction, assemblies);
+        public static IServiceCollection AddAutoMapper(
+            this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector, ServiceLifetime mapperLifetime,
+            params Assembly[] assemblies)
+            => AddAutoMapperClasses(services, additionalInitAction, assemblies, serviceLifetimeSelector, mapperLifetime);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
-            => AddAutoMapperClasses(services, null, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assemblies,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector = null, ServiceLifetime mapperLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, additionalInitAction, assemblies, serviceLifetimeSelector, mapperLifetime);
+
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector = null, ServiceLifetime mapperLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, null, assemblies, serviceLifetimeSelector, mapperLifetime);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
         {
             return AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
         }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Type[] profileAssemblyMarkerTypes)
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector, ServiceLifetime mapperLifetime,
+            params Type[] profileAssemblyMarkerTypes)
         {
-            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetimeSelector, mapperLifetime);
         }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Type> profileAssemblyMarkerTypes)
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Type> profileAssemblyMarkerTypes,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector = null, ServiceLifetime mapperLifetime = ServiceLifetime.Scoped)
         {
-            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetimeSelector, mapperLifetime);
         }
 
+        private static ServiceDescriptor CreateDescriptor(Type serviceType, ServiceLifetime lifetime)
+        {
+            return new ServiceDescriptor(serviceType, serviceType, lifetime);
+        }
 
-        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
+        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan,
+            Func<TypeInfo, ServiceLifetime> serviceLifetimeSelector = null, ServiceLifetime mapperLifetime = ServiceLifetime.Scoped)
         {
             additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
@@ -105,6 +112,9 @@
                 config = new MapperConfiguration(ConfigAction);
             }
 
+            serviceLifetimeSelector = serviceLifetimeSelector ?? (typeInfo => ServiceLifetime.Transient);
+
+
             var openTypes = new[]
             {
                 typeof(IValueResolver<,,>),
@@ -117,11 +127,15 @@
                     && !t.IsAbstract 
                     && t.AsType().ImplementsGenericInterface(openType))))
             {
-                services.AddTransient(type.AsType());
+                services.Add(CreateDescriptor(type.AsType(), serviceLifetimeSelector(type)));
             }
 
             services.AddSingleton(config);
-            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+            services.Add(new ServiceDescriptor(
+                typeof(IMapper), sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService),
+                mapperLifetime
+            ));
+            return services;
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
