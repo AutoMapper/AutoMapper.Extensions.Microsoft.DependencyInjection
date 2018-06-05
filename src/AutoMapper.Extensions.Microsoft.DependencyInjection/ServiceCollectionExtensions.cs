@@ -5,7 +5,6 @@
     using System.Linq;
     using System.Reflection;
     using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyModel;
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register them with the static/singleton Mapper class
@@ -30,11 +29,6 @@
         }
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction)
-        {
-            return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
-        }
-
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, DependencyContext dependencyContext)
         {
             return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
         }

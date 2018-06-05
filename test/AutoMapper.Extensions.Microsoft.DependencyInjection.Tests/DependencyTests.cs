@@ -11,6 +11,7 @@
 
         public DependencyTests()
         {
+            ServiceCollectionExtensions.UseStaticRegistration = false;
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
             services.AddAutoMapper(typeof(Source), typeof(Profile));

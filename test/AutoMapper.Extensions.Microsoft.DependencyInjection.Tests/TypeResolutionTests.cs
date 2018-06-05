@@ -12,6 +12,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
         public TypeResolutionTests()
         {
+            ServiceCollectionExtensions.UseStaticRegistration = false;
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source));
             _provider = services.BuildServiceProvider();
@@ -57,25 +58,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveTypeConverter()
         {
             _provider.GetService<FooTypeConverter>().ShouldNotBeNull();
-        }
-    }
-
-    public class TypeResolutionTests_ForStaticConfig
-    {
-        private readonly IServiceProvider _provider;
-
-        public TypeResolutionTests_ForStaticConfig()
-        {
-            ServiceCollectionExtensions.UseStaticRegistration = true;
-            IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(typeof(Source));
-            _provider = services.BuildServiceProvider();
-        }
-
-        [Fact]
-        public void ShouldInitializeStatically()
-        {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
         }
     }
 }

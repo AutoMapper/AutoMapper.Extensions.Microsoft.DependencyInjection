@@ -4,15 +4,14 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
     using System.Reflection;
-    using global::Microsoft.Extensions.DependencyModel;
     using Shouldly;
     using Xunit;
 
     public class AssemblyResolutionTests
     {
-        private readonly IServiceProvider _provider;
+        private static readonly IServiceProvider _provider;
 
-        public AssemblyResolutionTests()
+        static AssemblyResolutionTests()
         {
             ServiceCollectionExtensions.UseStaticRegistration = true;
 

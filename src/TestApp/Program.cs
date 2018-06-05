@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace TestApp
 {
-    using System.Reflection;
     using AutoMapper;
     using Microsoft.Extensions.DependencyInjection;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     public class Program
     {
@@ -19,12 +13,24 @@ namespace TestApp
             services.AddTransient<ISomeService>(sp => new FooService(5));
             services.AddAutoMapper(typeof(Source));
             var provider = services.BuildServiceProvider();
-            provider.GetService<IMapper>();
-
-            foreach (var service in services)
+            using (var scope = provider.CreateScope())
             {
-                Console.WriteLine(service.ServiceType + " - " + service.ImplementationType);
+                var mapper = scope.ServiceProvider.GetService<IMapper>();
+
+                foreach (var typeMap in mapper.ConfigurationProvider.GetAllTypeMaps())
+                {
+                    Console.WriteLine($"{typeMap.SourceType.Name} -> {typeMap.DestinationType.Name}");
+                }
+
+                foreach (var service in services)
+                {
+                    Console.WriteLine(service.ServiceType + " - " + service.ImplementationType);
+                }
+
+                var dest = mapper.Map<Dest2>(new Source2());
+                Console.WriteLine(dest.ResolvedValue);
             }
+
             Console.ReadKey();
         }
     }
