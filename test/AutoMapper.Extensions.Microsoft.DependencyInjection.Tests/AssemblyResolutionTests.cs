@@ -4,21 +4,24 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
     using System.Reflection;
-    using global::Microsoft.Extensions.DependencyModel;
     using Shouldly;
     using Xunit;
 
     public class AssemblyResolutionTests
     {
-        private readonly IServiceProvider _provider;
+        private static readonly IServiceProvider _provider;
 
-        public AssemblyResolutionTests()
+        static AssemblyResolutionTests()
         {
-            ServiceCollectionExtensions.UseStaticRegistration = true;
+            _provider = BuildServiceProvider();    
+        }
 
+        private static ServiceProvider BuildServiceProvider()
+        {
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source).GetTypeInfo().Assembly);
-            _provider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
         }
 
         [Fact]
@@ -40,9 +43,9 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
-        public void ShouldInitializeStatically()
+        public void CanRegisterTwiceWithoutProblems()
         {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
+            new Action(() => BuildServiceProvider()).ShouldNotThrow();
         }
     }
 }

@@ -45,8 +45,6 @@ $versionSuffix = @{ $true = "--version-suffix=$($suffix)"; $false = ""}[$suffix 
 echo "build: Package version suffix is $suffix"
 echo "build: Build version suffix is $buildSuffix" 
 	
-exec { dotnet restore }
-
 exec { dotnet build -c Release --version-suffix=$buildSuffix -v q /nologo }
 
 foreach ($test in ls test/*.Tests) {
@@ -54,12 +52,14 @@ foreach ($test in ls test/*.Tests) {
 
 	echo "build: Testing project in $test"
 
-    & dotnet test -c Release
-    if($LASTEXITCODE -ne 0) { exit 3 }
-
-    Pop-Location
+	try {
+		& dotnet test -c Release
+		if($LASTEXITCODE -ne 0) { exit 3 }
+	} finally {
+		Pop-Location
+	}
 }
 
-exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build $versionSuffix }
+exec { dotnet pack .\src\AutoMapper.Extensions.Microsoft.DependencyInjection -c Release -o ..\..\artifacts --include-symbols --no-build --no-restore $versionSuffix }
 
 Pop-Location

@@ -14,7 +14,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
         public AppDomainResolutionTests()
         {
-            ServiceCollectionExtensions.UseStaticRegistration = true;
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper();
             _provider = services.BuildServiceProvider();
@@ -36,12 +35,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void ShouldResolveMapper()
         {
             _provider.GetService<IMapper>().ShouldNotBeNull();
-        }
-
-        [Fact]
-        public void ShouldInitializeStatically()
-        {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
         }
     }
 }
