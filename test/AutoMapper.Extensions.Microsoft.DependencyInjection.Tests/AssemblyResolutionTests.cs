@@ -13,11 +13,15 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
         static AssemblyResolutionTests()
         {
-            ServiceCollectionExtensions.UseStaticRegistration = true;
+            _provider = BuildServiceProvider();    
+        }
 
+        private static ServiceProvider BuildServiceProvider()
+        {
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source).GetTypeInfo().Assembly);
-            _provider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider();
+            return serviceProvider;
         }
 
         [Fact]
@@ -39,9 +43,9 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         }
 
         [Fact]
-        public void ShouldInitializeStatically()
+        public void CanRegisterTwiceWithoutProblems()
         {
-            _provider.GetService<IConfigurationProvider>().ShouldBeSameAs(Mapper.Configuration);
+            new Action(() => BuildServiceProvider()).ShouldNotThrow();
         }
     }
 }

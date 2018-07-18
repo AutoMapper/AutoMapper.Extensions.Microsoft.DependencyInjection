@@ -11,8 +11,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void Should_not_register_static_instance_when_configured()
         {
-            ServiceCollectionExtensions.UseStaticRegistration = false;
-
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper();
 

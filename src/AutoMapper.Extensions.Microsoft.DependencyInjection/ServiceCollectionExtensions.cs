@@ -7,22 +7,16 @@
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
-    /// Extensions to scan for AutoMapper classes and register them with the static/singleton Mapper class
-    /// - Finds <see cref="Profile"/> classes and initializes AutoMapper with them using <see cref="Mapper.Initialize(Action{AutoMapper.IMapperConfigurationExpression})"/>
+    /// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection
+    /// - Finds <see cref="Profile"/> classes and initializes a new <see cref="MapperConfiguration" />
     /// - Scans for <see cref="ITypeConverter{TSource,TDestination}"/>, <see cref="IValueResolver{TSource,TDestination,TDestMember}"/>, <see cref="IMemberValueResolver{TSource,TDestination,TSourceMember,TDestMember}" /> and <see cref="IMappingAction{TSource,TDestination}"/> implementations and registers them as <see cref="ServiceLifetime.Transient"/>
-    /// - Registers <see cref="Mapper.Configuration"/> as <see cref="ServiceLifetime.Singleton"/>
+    /// - Registers <see cref="IConfigurationProvider"/> as <see cref="ServiceLifetime.Singleton"/>
     /// - Registers <see cref="IMapper"/> as <see cref="ServiceLifetime.Scoped"/> with a service factory of the scoped <see cref="IServiceProvider"/>
-    /// After calling AddAutoMapper you will have the static <see cref="Mapper"/> configuration initialized and you can use Mapper.Map and ProjectTo in your application code.
-    /// To use instance-based registration instead of the static <see cref="Mapper"/> class, set the <see cref="UseStaticRegistration"/> to false.
+    /// After calling AddAutoMapper you can resolve an <see cref="IMapper" /> instance from a scoped service provider, or as a dependency
+    /// To use <see cref="QueryableExtensions.Extensions.ProjectTo{TDestination}(IQueryable,IConfigurationProvider, System.Linq.Expressions.Expression{System.Func{TDestination, object}}[])" /> you can resolve the <see cref="IConfigurationProvider"/> instance directly for from an <see cref="IMapper" /> instance.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-        /// <summary>
-        /// Use the static registration method of Mapper.Initialize. Defaults to true.
-        /// When false, an instance of a MapperConfiguration object is registered instead.
-        /// </summary>
-        public static bool UseStaticRegistration { get; set; } = true;
-
         public static IServiceCollection AddAutoMapper(this IServiceCollection services)
         {
             return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies());
@@ -65,6 +59,10 @@
 
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
         {
+            // Just return if we've already added AutoMapper to avoid double-registration
+            if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
+                return services;
+
             additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
@@ -88,16 +86,7 @@
                 }
             }
 
-            IConfigurationProvider config;
-            if (UseStaticRegistration)
-            {
-                Mapper.Initialize(ConfigAction);
-                config = Mapper.Configuration;
-            }
-            else
-            {
-                config = new MapperConfiguration(ConfigAction);
-            }
+            IConfigurationProvider config = new MapperConfiguration(ConfigAction);
 
             var openTypes = new[]
             {
