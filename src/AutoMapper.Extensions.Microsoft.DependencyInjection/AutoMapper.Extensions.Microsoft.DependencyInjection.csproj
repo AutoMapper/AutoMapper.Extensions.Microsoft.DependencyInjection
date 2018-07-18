@@ -1,22 +1,25 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <Description>AutoMapper extensions for ASP.NET Core</Description>
-        <Copyright>Copyright Jimmy Bogard</Copyright>
-        <VersionPrefix>4.0.1</VersionPrefix>
-        <Authors>Jimmy Bogard</Authors>
-        <TargetFrameworks>netstandard2.0</TargetFrameworks>
-        <AssemblyName>AutoMapper.Extensions.Microsoft.DependencyInjection</AssemblyName>
-        <PackageId>AutoMapper.Extensions.Microsoft.DependencyInjection</PackageId>
-        <PackageIconUrl>https://s3.amazonaws.com/automapper/icon.png</PackageIconUrl>
-        <PackageProjectUrl>http://automapper.org</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/AutoMapper/AutoMapper/blob/master/LICENSE.txt</PackageLicenseUrl>
-        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    </PropertyGroup>
+  <PropertyGroup>
+    <Description>AutoMapper extensions for ASP.NET Core</Description>
+    <Copyright>Copyright Jimmy Bogard</Copyright>
+    <VersionPrefix>5.0.0</VersionPrefix>
+    <Authors>Jimmy Bogard</Authors>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <AssemblyName>AutoMapper.Extensions.Microsoft.DependencyInjection</AssemblyName>
+    <PackageId>AutoMapper.Extensions.Microsoft.DependencyInjection</PackageId>
+    <PackageIconUrl>https://s3.amazonaws.com/automapper/icon.png</PackageIconUrl>
+    <PackageProjectUrl>http://automapper.org</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/AutoMapper/AutoMapper/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
-        <PackageReference Include="AutoMapper" Version="7.0.1" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
+    <PackageReference Include="AutoMapper" Version="7.0.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63102-01" PrivateAssets="All"/>
+  </ItemGroup>
 
 </Project>
