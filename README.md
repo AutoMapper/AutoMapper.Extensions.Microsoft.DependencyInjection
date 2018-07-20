@@ -66,24 +66,3 @@ var orders = await dbContext.Orders
 ```
 
 If you use `ProjectTo` without passing in the configuration instance, AutoMapper falls back to the uninitialized static instance, and you will see a runtime exception.
-
-## Mapping Configuration Validation
-In ASP.NET Core apps, you can also use the following `IApplicationBuilder` extension method to assert that your mapping configuration is valid:
-
-```c#
-app.AssertAutoMapperConfigurationIsValid();
-```
-It is recommended that you add this after `app.UseDeveloperExceptionPage()` otherwise it may cause your app to return empty *Internal Server Error (500)* errors.
-
-Example:
-```c#
-public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-{
-    if (env.IsDevelopment())
-    {
-        app.UseDeveloperExceptionPage();
-        app.AssertAutoMapperConfigurationIsValid();
-    }
-}
-```
-
