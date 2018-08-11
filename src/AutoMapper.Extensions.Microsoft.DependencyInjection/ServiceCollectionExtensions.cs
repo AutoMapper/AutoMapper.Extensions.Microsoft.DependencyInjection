@@ -19,51 +19,54 @@
     {
         public static IServiceCollection AddAutoMapper(this IServiceCollection services)
         {
-            return services.AddAutoMapper(null, AppDomain.CurrentDomain.GetAssemblies());
+            return services.AddAutoMapper((Action<IServiceProvider, IMapperConfigurationExpression>)null, AppDomain.CurrentDomain.GetAssemblies());
         }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction)
-        {
-            return services.AddAutoMapper(additionalInitAction, AppDomain.CurrentDomain.GetAssemblies());
-        }
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
+            => services.AddAutoMapper((sp, cfg) => configAction?.Invoke(cfg), AppDomain.CurrentDomain.GetAssemblies());
 
-        private static readonly Action<IMapperConfigurationExpression> DefaultConfig = cfg => { };
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
+            => services.AddAutoMapper(configAction, AppDomain.CurrentDomain.GetAssemblies());
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Assembly[] assemblies) 
-            => AddAutoMapperClasses(services, additionalInitAction, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Assembly[] assemblies) 
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assemblies) 
-            => AddAutoMapperClasses(services, additionalInitAction, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
+            => AddAutoMapperClasses(services, configAction, assemblies);
+
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
+
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies) 
+            => AddAutoMapperClasses(services, configAction, assemblies);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
-        {
-            return AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
-        }
+            => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, params Type[] profileAssemblyMarkerTypes)
-        {
-            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
-        }
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Type> profileAssemblyMarkerTypes)
-        {
-            return AddAutoMapperClasses(services, additionalInitAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
-        }
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IMapperConfigurationExpression> additionalInitAction, IEnumerable<Assembly> assembliesToScan)
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+
+        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assembliesToScan)
         {
             // Just return if we've already added AutoMapper to avoid double-registration
             if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
                 return services;
 
-            additionalInitAction = additionalInitAction ?? DefaultConfig;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan
@@ -75,18 +78,15 @@
                 .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
-
-            void ConfigAction(IMapperConfigurationExpression cfg)
+            void ConfigAction(IServiceProvider serviceProvider, IMapperConfigurationExpression cfg)
             {
-                additionalInitAction(cfg);
+                configAction?.Invoke(serviceProvider, cfg);
 
                 foreach (var profile in profiles.Select(t => t.AsType()))
                 {
                     cfg.AddProfile(profile);
                 }
             }
-
-            IConfigurationProvider config = new MapperConfiguration(ConfigAction);
 
             var openTypes = new[]
             {
@@ -103,14 +103,12 @@
                 services.AddTransient(type.AsType());
             }
 
-            services.AddSingleton(config);
+            services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
-        {
-            return type.IsGenericType(interfaceType) || type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
-        }
+            => type.IsGenericType(interfaceType) || type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
 
         private static bool IsGenericType(this Type type, Type genericType)
             => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
