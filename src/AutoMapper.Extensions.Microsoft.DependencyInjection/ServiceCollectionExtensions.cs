@@ -74,8 +74,9 @@
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
+            var profileTypeInfo = typeof(Profile).GetTypeInfo();
             var profiles = allTypes
-                .Where(t => typeof(Profile).GetTypeInfo().IsAssignableFrom(t) && !t.IsAbstract)
+                .Where(t => profileTypeInfo.IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
             void ConfigAction(IServiceProvider serviceProvider, IMapperConfigurationExpression cfg)
