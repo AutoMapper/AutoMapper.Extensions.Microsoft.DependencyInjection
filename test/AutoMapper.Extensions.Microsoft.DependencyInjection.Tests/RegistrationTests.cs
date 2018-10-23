@@ -13,6 +13,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         {
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper();
+            services.AddTransient<ISomeService>(sp => new FooService(5));
 
             var serviceProvider = services.BuildServiceProvider();
 

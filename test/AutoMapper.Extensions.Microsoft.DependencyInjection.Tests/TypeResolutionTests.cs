@@ -14,6 +14,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         {
             IServiceCollection services = new ServiceCollection();
             services.AddAutoMapper(typeof(Source));
+            services.AddTransient<ISomeService>(sp => new FooService(5));
             _provider = services.BuildServiceProvider();
         }
 
@@ -26,7 +27,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void ShouldConfigureProfiles()
         {
-            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(2);
+            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(3);
         }
 
         [Fact]

@@ -85,7 +85,8 @@
 
                 foreach (var profile in profiles.Select(t => t.AsType()))
                 {
-                    cfg.AddProfile(profile);
+                    var profileInstance = ActivatorUtilities.GetServiceOrCreateInstance(serviceProvider, profile) as Profile;
+                    cfg.AddProfile(profileInstance);
                 }
             }
 

@@ -18,6 +18,15 @@
     {
         public int ResolvedValue { get; set; }
     }
+    
+    public class Source3
+    {
+    }
+
+    public class Dest3
+    {
+        public int ResolvedValue { get; set; }
+    }
 
     public class Profile1 : Profile
     {
@@ -35,6 +44,15 @@
         {
             CreateMap<Source2, Dest2>()
                 .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing<DependencyResolver>());
+        }
+    }
+    
+    internal class Profile3 : Profile
+    {
+        public Profile3(ISomeService someService)
+        {
+            CreateMap<Source3, Dest3>()
+                .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing(src => someService.Modify(10)));
         }
     }
 

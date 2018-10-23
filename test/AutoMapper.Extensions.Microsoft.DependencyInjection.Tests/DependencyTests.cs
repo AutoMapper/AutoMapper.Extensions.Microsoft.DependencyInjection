@@ -25,5 +25,14 @@
 
             dest.ResolvedValue.ShouldBe(5);
         }
+        
+        [Fact]
+        public void ShouldResolveWithDependencyInjectedInProfileConstructor()
+        {
+            var mapper = _provider.GetService<IMapper>();
+            var dest = mapper.Map<Source3, Dest3>(new Source3());
+
+            dest.ResolvedValue.ShouldBe(15);
+        }
     }
 }
