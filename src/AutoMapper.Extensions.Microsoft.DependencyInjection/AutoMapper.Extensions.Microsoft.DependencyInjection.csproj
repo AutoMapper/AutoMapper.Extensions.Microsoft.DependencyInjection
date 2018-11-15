@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>AutoMapper extensions for ASP.NET Core</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>5.1.0</VersionPrefix>
+    <VersionPrefix>6.0.0</VersionPrefix>
     <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>AutoMapper.Extensions.Microsoft.DependencyInjection</AssemblyName>
@@ -14,6 +14,8 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\AutoMapper.Extensions.Microsoft.DependencyInjection.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>
