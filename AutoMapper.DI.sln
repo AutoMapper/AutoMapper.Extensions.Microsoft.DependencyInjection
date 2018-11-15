@@ -6,6 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{1082ED20-13D1-444F-BAFD-17EFB9152981}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		AutoMapper.Extensions.Microsoft.DependencyInjection.snk = AutoMapper.Extensions.Microsoft.DependencyInjection.snk
 		Build.ps1 = Build.ps1
 		README.md = README.md
 	EndProjectSection
