@@ -12,11 +12,13 @@
 
     public class Source2
     {
+        public int ConvertedValue { get; set; }
     }
 
     public class Dest2
     {
         public int ResolvedValue { get; set; }
+        public int ConvertedValue { get; set; }
     }
 
     public class Profile1 : Profile
@@ -34,7 +36,8 @@
         public Profile2()
         {
             CreateMap<Source2, Dest2>()
-                .ForMember(d => d.ResolvedValue, opt => opt.MapFrom<DependencyResolver>());
+                .ForMember(d => d.ResolvedValue, opt => opt.MapFrom<DependencyResolver>())
+                .ForMember(d => d.ConvertedValue, opt => opt.ConvertUsing<DependencyValueConverter, int>());
         }
     }
 
@@ -103,5 +106,15 @@
     {
         public int Convert(int sourceMember, ResolutionContext context)
             => sourceMember + 1;
+    }
+
+    internal class DependencyValueConverter : IValueConverter<int, int>
+    {
+        private readonly ISomeService _service;
+
+        public DependencyValueConverter(ISomeService service) => _service = service;
+
+        public int Convert(int sourceMember, ResolutionContext context)
+            => _service.Modify(sourceMember);
     }
 }
