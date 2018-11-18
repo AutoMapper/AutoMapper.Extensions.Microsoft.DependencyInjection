@@ -34,7 +34,7 @@
         public Profile2()
         {
             CreateMap<Source2, Dest2>()
-                .ForMember(d => d.ResolvedValue, opt => opt.ResolveUsing<DependencyResolver>());
+                .ForMember(d => d.ResolvedValue, opt => opt.MapFrom<DependencyResolver>());
         }
     }
 
@@ -97,5 +97,11 @@
         {
             return null;
         }
+    }
+
+    internal class FooValueConverter : IValueConverter<int, int>
+    {
+        public int Convert(int sourceMember, ResolutionContext context)
+            => sourceMember + 1;
     }
 }
