@@ -58,5 +58,11 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         {
             _provider.GetService<FooTypeConverter>().ShouldNotBeNull();
         }
+
+        [Fact]
+        public void ShouldResolveValueConverter()
+        {
+            _provider.GetService<FooValueConverter>().ShouldNotBeNull();
+        }
     }
 }

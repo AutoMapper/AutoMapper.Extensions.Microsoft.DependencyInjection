@@ -94,6 +94,7 @@
                 typeof(IValueResolver<,,>),
                 typeof(IMemberValueResolver<,,,>),
                 typeof(ITypeConverter<,>),
+                typeof(IValueConverter<,>),
                 typeof(IMappingAction<,>)
             };
             foreach (var type in openTypes.SelectMany(openType => allTypes
