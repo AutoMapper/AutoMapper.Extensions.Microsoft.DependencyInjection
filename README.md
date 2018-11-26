@@ -49,7 +49,7 @@ You cannot use the static `Mapper` class to map, as this does not play nicely wi
 
 ### ProjectTo usage
 
-Starting with 8.0 you can use IMapper.ProjectTo. The old `ProjectTo` is an extension method and does not have dependency injection available. Pass an `IConfigurationProvider` instance directly:
+Starting with 8.0 you can use `IMapper.ProjectTo`. The old `ProjectTo` is an extension method and does not have dependency injection available. Pass an `IConfigurationProvider` instance directly:
 
 ```c#
 var orders = await dbContext.Orders
