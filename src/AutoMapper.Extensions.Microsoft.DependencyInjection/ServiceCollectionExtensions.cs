@@ -5,6 +5,10 @@
     using System.Linq;
     using System.Reflection;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using AutoMapper.Extensions.Microsoft.DependencyInjection;
+    using AutoMapper.Extensions.Microsoft.DependencyInjection.Internal;
+    using System.ComponentModel;
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection
@@ -17,50 +21,172 @@
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services)
+        public static IAutoMapperBuilder AddAutoMapper(this IServiceCollection services)
         {
-            return services.AddAutoMapper((Action<IServiceProvider, IMapperConfigurationExpression>)null, AppDomain.CurrentDomain.GetAssemblies());
+            return AddAutoMapperInternal(services, null);
         }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
-            => services.AddAutoMapper((sp, cfg) => configAction?.Invoke(cfg), AppDomain.CurrentDomain.GetAssemblies());
+        public static IAutoMapperBuilder AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
+        {
+            if(configAction != null)
+            {
+                return AddAutoMapperInternal(services, (sp, cfg) => configAction.Invoke(cfg));
+            }
+            else
+            {
+                return AddAutoMapperInternal(services, null);
+            }
+            
+        }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
-            => services.AddAutoMapper(configAction, AppDomain.CurrentDomain.GetAssemblies());
+        //public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
+        //    => services.AddAutoMapper(configAction, AppDomain.CurrentDomain.GetAssemblies());
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
-            => AddAutoMapperClasses(services, null, assemblies);
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Assembly[] assemblies) 
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
-            => AddAutoMapperClasses(services, configAction, assemblies);
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies) 
-            => AddAutoMapperClasses(services, configAction, assemblies);
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
-            => AddAutoMapperClasses(services, null, assemblies);
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services);
+            builder.AddAssemblies(assemblies);
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services);
+            builder.AddAssemblies(profileAssemblyMarkerTypes.Select(t=>t.Assembly));
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services,configAction);
+            builder.AddAssemblies(profileAssemblyMarkerTypes.Select(t => t.Assembly));
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(profileAssemblyMarkerTypes.Select(t => t.Assembly));
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(profileAssemblyMarkerTypes.Select(t => t.Assembly));
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Use other method and  returned builder to add Assmblies please")]
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        {
+            if (services == null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+            var builder = AddAutoMapper(services, configAction);
+            builder.AddAssemblies(profileAssemblyMarkerTypes.Select(t => t.Assembly));
+            return services;
+        }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("no longer used",true)]
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assembliesToScan)
         {
             // Just return if we've already added AutoMapper to avoid double-registration
@@ -107,6 +233,39 @@
 
             services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
             return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+        }
+
+
+
+        public static IAutoMapperBuilder AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
+        {
+            return AddAutoMapperInternal(services, configAction);
+        }
+
+        public static IAutoMapperBuilder AddAutoMapperInternal(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
+        {
+            services = services ?? throw new ArgumentNullException(nameof(services));
+            if (configAction != null)
+            {
+                services.AddSingleton<IPostAutoMapperConfiguration>(new PostAutoMapperConfiguration(configAction));
+            }
+
+            services.TryAddSingleton<IConfigurationProvider>(sp =>
+            {
+                var postConfigs = sp.GetRequiredService<IEnumerable<IPostAutoMapperConfiguration>>();//should be Singletion
+                var mapConfigProvider = sp.GetRequiredService<IAutoMapConfigurationProvider>();//should be Singletion
+                return new MapperConfiguration(cfg =>
+                {
+                    cfg.AddProfiles(mapConfigProvider.GetMapProfilerTypes());
+                    foreach (var config in postConfigs)
+                    {
+                        config?.Configuration(sp, cfg);
+                    }
+                });
+            });
+            services.TryAddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+            var builder = new AutoMapperBuilder(services);
+            return builder;
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
