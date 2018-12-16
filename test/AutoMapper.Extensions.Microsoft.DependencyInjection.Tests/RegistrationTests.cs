@@ -41,7 +41,8 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
             services.AddAutoMapper(x=> Console.WriteLine(x.ToString()))
                 .AddProfileType<Profile2>();
 
-            var serviceProvider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider(true);
+
 
             var config = serviceProvider.GetService<IConfigurationProvider>();
             config.ShouldNotBeNull();
