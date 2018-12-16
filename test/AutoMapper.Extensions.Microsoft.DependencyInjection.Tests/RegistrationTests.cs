@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -37,16 +38,21 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
             services.AddAutoMapper()
                 .AddAssembly(typeof(Dest).Assembly);
 
-            services.AddAutoMapper()
+            services.AddAutoMapper(x=> Console.WriteLine(x.ToString()))
                 .AddProfileType<Profile2>();
 
             var serviceProvider = services.BuildServiceProvider();
 
             var config = serviceProvider.GetService<IConfigurationProvider>();
             config.ShouldNotBeNull();
+
             var typeProvider = serviceProvider.GetRequiredService<IAutoMapperConfigurationProvider>();
             var profileTypes = typeProvider.GetMapProfileTypes();
             Assert.Equal(2, profileTypes.Count());
+
+            var postConfigs = serviceProvider.GetRequiredService<IEnumerable<IPostAutoMapperConfiguration>>();
+            Assert.Single(postConfigs);
+
             try
             {
                 config.ShouldNotBeSameAs(Mapper.Configuration);
