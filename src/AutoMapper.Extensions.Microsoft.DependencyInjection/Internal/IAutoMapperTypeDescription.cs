@@ -7,6 +7,5 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Internal
     public interface IAutoMapperTypeDescription
     {
         IEnumerable<Type> ProfileTypes { get; }
-        IEnumerable<Type> RelatedTypes { get; }
     }
 }

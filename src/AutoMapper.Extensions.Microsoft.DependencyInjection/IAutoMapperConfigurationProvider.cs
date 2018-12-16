@@ -4,10 +4,9 @@ using System.Text;
 
 namespace AutoMapper.Extensions.Microsoft.DependencyInjection
 {
-    public interface IAutoMapConfigurationProvider
+    public interface IAutoMapperConfigurationProvider
     {
-        IEnumerable<Type> GetMapProfilerTypes();
+        IEnumerable<Type> GetMapProfileTypes();
 
-        IEnumerable<Type> GetRelatedTypes();
     }
 }

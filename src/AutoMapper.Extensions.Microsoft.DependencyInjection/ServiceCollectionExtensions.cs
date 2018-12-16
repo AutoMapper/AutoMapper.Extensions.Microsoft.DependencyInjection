@@ -249,14 +249,18 @@
             {
                 services.AddSingleton<IPostAutoMapperConfiguration>(new PostAutoMapperConfiguration(configAction));
             }
-
+            services.TryAddSingleton<IAutoMapperConfigurationProvider, AutoMapperConfigurationProvider>();
             services.TryAddSingleton<IConfigurationProvider>(sp =>
             {
                 var postConfigs = sp.GetRequiredService<IEnumerable<IPostAutoMapperConfiguration>>();//should be Singletion
-                var mapConfigProvider = sp.GetRequiredService<IAutoMapConfigurationProvider>();//should be Singletion
+                var mapConfigProvider = sp.GetRequiredService<IAutoMapperConfigurationProvider>();//should be Singletion
                 return new MapperConfiguration(cfg =>
                 {
-                    cfg.AddProfiles(mapConfigProvider.GetMapProfilerTypes());
+                    foreach(var t in mapConfigProvider.GetMapProfileTypes())
+                    {
+                        cfg.AddProfile(t);
+                    }
+                    //cfg.AddProfiles();
                     foreach (var config in postConfigs)
                     {
                         config?.Configuration(sp, cfg);

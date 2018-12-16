@@ -15,7 +15,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Internal
 
         public AutoMapperAssemblyDescription(IEnumerable<Assembly> assemblies)
         {
-            Assemblies = assemblies;
+            Assemblies = assemblies ?? throw new ArgumentNullException(nameof(assemblies));
         }
 
         public IEnumerable<Assembly> Assemblies { get; }
