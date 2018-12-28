@@ -70,7 +70,6 @@ If you use `ProjectTo` without passing in the configuration instance, AutoMapper
 ### Configuration Validation
 Don't use the static `Mapper.Configuration.AssertConfigurationIsValid()`, it just won't work. Instead you can let the DI framework inject an instance of `IMapper` into your `Configure()` method. You can then use its Configuration property to call `AssertConfigurationIsValid()`.
 
-
 ``` diff
 public class Startup
 {
@@ -79,10 +78,10 @@ public class Startup
         services.AddAutoMapper(/* ... */);
     }
 
--    public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-+    public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
+-   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
++   public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
     {
-+        autoMapper.Configuration.AssertConfigurationIsValid();
++        autoMapper.ConfigurationProvider.AssertConfigurationIsValid();
     }
 }
 ```
