@@ -61,14 +61,14 @@ Or you can use an `IMapper` instance:
 
 ```c#
 var orders = await dbContext.Orders
-                       .ProjectTo<OrderDto>(_mapper.Configuration)
+                       .ProjectTo<OrderDto>(_mapper.ConfigurationProvider)
 					   .ToListAsync();
 ```
 
 If you use `ProjectTo` without passing in the configuration instance, AutoMapper falls back to the uninitialized static instance, and you will see a runtime exception.
 
 ### Configuration Validation
-Don't use the static `Mapper.Configuration.AssertConfigurationIsValid()`, it just won't work. Instead you can let the DI framework inject an instance of `IMapper` into your `Configure()` method. You can then use its Configuration property to call `AssertConfigurationIsValid()`.
+Don't use the static `Mapper.Configuration.AssertConfigurationIsValid()`, it just won't work. Instead you can let the DI framework inject an instance of `IMapper` into your `Configure()` method. You can then use its ConfigurationProvider property to call `AssertConfigurationIsValid()`.
 
 ``` diff
 public class Startup
@@ -92,7 +92,7 @@ You can also inject just the `IConfigurationProvider`, but beware that an interf
 -public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
 +public void Configure(IApplicationBuilder app, IHostingEnvironment env, AutoMapper.IConfigurationProvider autoMapper)
 {
--    autoMapper.Configuration.AssertConfigurationIsValid();
+-    autoMapper.ConfigurationProvider.AssertConfigurationIsValid();
 +    autoMapper.AssertConfigurationIsValid();
 }
 ```
