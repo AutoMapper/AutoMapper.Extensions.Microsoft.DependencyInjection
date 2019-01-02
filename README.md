@@ -22,6 +22,7 @@ This registers AutoMapper:
 - As a singleton for the `MapperConfiguration`
 - As a scoped instance for `IMapper`
 - `ITypeConverter` instances as transient
+- `IValueConverter` instances as transient
 - `IValueResolver` instances as transient
 - `IMemberValueResolver` instances as transient
 - `IMappingAction` instances as transient
@@ -61,7 +62,7 @@ Or you can use an `IMapper` instance:
 
 ```c#
 var orders = await dbContext.Orders
-                       .ProjectTo<OrderDto>(_mapper.ConfigurationProvider)
+                       .ProjectTo<OrderDto>(_mapper)
 					   .ToListAsync();
 ```
 
