@@ -70,7 +70,7 @@
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan
-                .Where(a => a.GetName().Name != nameof(AutoMapper))
+                .Where(a => !a.IsDynamic && a.GetName().Name != nameof(AutoMapper))
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
