@@ -70,8 +70,8 @@
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan
-                .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
                 .Where(a => !a.IsDynamic && a.GetName().Name != nameof(AutoMapper))
+                .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
