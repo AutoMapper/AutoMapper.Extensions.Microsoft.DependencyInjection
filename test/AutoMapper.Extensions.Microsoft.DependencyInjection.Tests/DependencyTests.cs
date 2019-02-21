@@ -13,7 +13,7 @@
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
-            services.AddAutoMapper(typeof(Source), typeof(Profile), typeof(Source)); // no more AutoMapper.DuplicateTypeMapConfigurationException
+            services.AddAutoMapper(typeof(Source), typeof(Profile), typeof(Source));
             _provider = services.BuildServiceProvider();
 
             _provider.GetService<IConfigurationProvider>().AssertConfigurationIsValid();
