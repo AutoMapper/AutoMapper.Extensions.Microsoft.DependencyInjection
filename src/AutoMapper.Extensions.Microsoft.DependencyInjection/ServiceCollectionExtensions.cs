@@ -64,12 +64,17 @@
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assembliesToScan)
         {
             // Just return if we've already added AutoMapper to avoid double-registration
+
+            // TODO: It is probably better to explicitly throw an exception instead of just returning silently.
+            // A subsequent calls can come with a completely different set of assembliesToScan / configAction
+            // but only the first will win. So for subsequent calls their profiles will be silently ignored.
             if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
                 return services;
 
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
 
             var allTypes = assembliesToScan
+                .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
                 .Where(a => !a.IsDynamic && a.GetName().Name != nameof(AutoMapper))
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
