@@ -71,6 +71,7 @@
 
             var allTypes = assembliesToScan
                 .Where(a => !a.IsDynamic && a.GetName().Name != nameof(AutoMapper))
+                .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
