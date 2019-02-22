@@ -62,7 +62,7 @@ Or you can use an `IMapper` instance:
 
 ```c#
 var orders = await dbContext.Orders
-                       .ProjectTo<OrderDto>(_mapper)
+                       .ProjectTo<OrderDto>(_mapper.ConfigurationProvider)
 					   .ToListAsync();
 ```
 
