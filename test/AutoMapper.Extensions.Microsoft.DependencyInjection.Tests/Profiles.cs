@@ -117,4 +117,19 @@
         public int Convert(int sourceMember, ResolutionContext context)
             => _service.Modify(sourceMember);
     }
+
+    internal class PersonProfile : Profile
+    {
+        public PersonProfile() => CreateMap<Person, Pirate>().ForMember(m => m.Name, opt => opt.MapFrom(m => "Pirate " + m.Name));
+    }
+
+    public class Person
+    {
+        public string Name { get; set; }
+    }
+
+    public class Pirate
+    {
+        public string Name { get; set; }
+    }
 }
