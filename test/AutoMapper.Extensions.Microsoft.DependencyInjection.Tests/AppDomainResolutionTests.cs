@@ -15,7 +15,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public AppDomainResolutionTests()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper();
+            services.AddAutoMapper(typeof(AppDomainResolutionTests));
             _provider = services.BuildServiceProvider();
         }
 
