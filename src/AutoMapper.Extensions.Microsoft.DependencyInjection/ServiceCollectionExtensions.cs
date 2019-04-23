@@ -83,13 +83,21 @@
                 .Where(t => profileTypeInfo.IsAssignableFrom(t) && !t.IsAbstract)
                 .ToArray();
 
+            foreach (var profile in profiles.Select(t => t.AsType()))
+            {
+                services.Add(new ServiceDescriptor(
+                     serviceType: profile,
+                            implementationType: profile,
+                            lifetime: ServiceLifetime.Singleton));
+            }
+
             void ConfigAction(IServiceProvider serviceProvider, IMapperConfigurationExpression cfg)
             {
                 configAction?.Invoke(serviceProvider, cfg);
 
                 foreach (var profile in profiles.Select(t => t.AsType()))
                 {
-                    cfg.AddProfile(profile);
+                    cfg.AddProfile(serviceProvider.GetService(profile) as Profile);
                 }
             }
 

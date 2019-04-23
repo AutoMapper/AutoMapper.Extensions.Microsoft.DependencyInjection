@@ -36,5 +36,18 @@
 
             dest.ConvertedValue.ShouldBe(10);
         }
+
+        [Fact]
+        public void ProfileCanHaveDependency()
+        {
+           var profile1= _provider.GetService<Profile1>();
+
+            var mapper = _provider.GetService<IMapper>();
+            var dest = mapper.Map<Source2, Dest2>(new Source2());
+
+            dest.ResolvedValue.ShouldBe(5);
+            profile1.SomeServiceInstance.ShouldNotBeNull();
+            profile1.SomeServiceInstance.ShouldBeOfType<FooService>();
+        }
     }
 }

@@ -23,10 +23,13 @@
 
     public class Profile1 : Profile
     {
-        public Profile1()
+        public Profile1(ISomeService someService)
         {
+            SomeServiceInstance = someService;
             CreateMap<Source, Dest>();
         }
+
+        public ISomeService SomeServiceInstance { get; private set; }
     }
 
     public abstract class AbstractProfile : Profile { }
