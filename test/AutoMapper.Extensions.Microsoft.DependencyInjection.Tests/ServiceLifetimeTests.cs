@@ -9,7 +9,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
 	public class ServiceLifetimeTests
 	{
-		//Implicitly Scoped
+		//Implicitly Transient
 		[Fact]
 		public void AddAutoMapperExtensionDefaultWithAssemblySingleDelegateArgCollection()
 		{
@@ -22,7 +22,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
 			//assert
 			serviceDescriptor.ShouldNotBeNull();
-			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
 		}
 
 		[Fact]
@@ -37,7 +37,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
 			//assert
 			serviceDescriptor.ShouldNotBeNull();
-			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
 		}
 
 		[Fact]
@@ -52,7 +52,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
 			//assert
 			serviceDescriptor.ShouldNotBeNull();
-			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
 		}
 
 		[Fact]
@@ -67,7 +67,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
 			//assert
 			serviceDescriptor.ShouldNotBeNull();
-			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
 		}
 
 		[Fact]
@@ -82,7 +82,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 
 			//assert
 			serviceDescriptor.ShouldNotBeNull();
-			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Scoped);
+			serviceDescriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
 		}
 
 		//Explicitly Singleton
