@@ -1,4 +1,6 @@
-﻿namespace AutoMapper
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace AutoMapper
 {
     using System;
     using System.Collections.Generic;
@@ -40,14 +42,14 @@
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, configAction, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, serviceLifetime);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies) 
-            => AddAutoMapperClasses(services, configAction, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped) 
+            => AddAutoMapperClasses(services, configAction, assemblies, serviceLifetime);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
-            => AddAutoMapperClasses(services, null, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, null, assemblies, serviceLifetime);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
             => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
@@ -58,13 +60,16 @@
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
             => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, 
+            IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Type> profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, 
+            IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
+            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime);
 
-        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assembliesToScan)
+        private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, 
+            IEnumerable<Assembly> assembliesToScan, ServiceLifetime serviceLifetime = ServiceLifetime.Scoped)
         {
             // Just return if we've already added AutoMapper to avoid double-registration
             if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
@@ -110,7 +115,25 @@
             }
 
             services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
-            return services.AddScoped<IMapper>(sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+            switch (serviceLifetime)
+            {
+                case ServiceLifetime.Singleton:
+                    services.TryAddSingleton<IMapper>(sp =>
+                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+                    break;
+                case ServiceLifetime.Scoped:
+                    services.TryAddScoped<IMapper>(sp =>
+                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+                    break;
+                case ServiceLifetime.Transient:
+                    services.TryAddTransient<IMapper>(sp =>
+                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(serviceLifetime), serviceLifetime, "Unrecognized Service Lifetime.");
+            }
+
+            return services;
         }
 
         private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
