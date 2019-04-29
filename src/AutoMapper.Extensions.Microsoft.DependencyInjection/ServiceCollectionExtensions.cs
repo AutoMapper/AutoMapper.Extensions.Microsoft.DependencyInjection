@@ -116,7 +116,7 @@ namespace AutoMapper
 
             services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
             services.Add(new ServiceDescriptor(typeof(IMapper),
-	            sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>()), serviceLifetime));
+	            sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService), serviceLifetime));
 
             return services;
         }
