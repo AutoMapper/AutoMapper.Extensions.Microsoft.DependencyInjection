@@ -20,7 +20,7 @@ services.AddAutoMapper(type1, type2 /*, ...*/);
 This registers AutoMapper:
 
 - As a singleton for the `MapperConfiguration`
-- As a scoped instance for `IMapper`
+- As a transient instance for `IMapper`
 - `ITypeConverter` instances as transient
 - `IValueConverter` instances as transient
 - `IValueResolver` instances as transient
@@ -29,7 +29,7 @@ This registers AutoMapper:
 
 Mapping configuration is static as it is the root object that can create an `IMapper`.
 
-Mapper instances are registered as scoped as they are intented to be used within the lifetime of a request. Since a `Mapper` instance can internally create other instances during mapping, it cannot be registered statically.
+Mapper instances are registered as transient as they are intented to be used within the lifetime of a request. You can configure this with the `serviceLifetime` parameter. Be careful changing this as `Mapper` takes a dependency on a factory method to instantiate the other extensions.
 
 ### Mapper.Map usage
 
