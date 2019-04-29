@@ -115,23 +115,8 @@ namespace AutoMapper
             }
 
             services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
-            switch (serviceLifetime)
-            {
-                case ServiceLifetime.Singleton:
-                    services.TryAddSingleton<IMapper>(sp =>
-                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
-                    break;
-                case ServiceLifetime.Scoped:
-                    services.TryAddScoped<IMapper>(sp =>
-                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
-                    break;
-                case ServiceLifetime.Transient:
-                    services.TryAddTransient<IMapper>(sp =>
-                        new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService));
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(serviceLifetime), serviceLifetime, "Unrecognized Service Lifetime.");
-            }
+            services.Add(new ServiceDescriptor(typeof(IMapper),
+	            sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>()), serviceLifetime));
 
             return services;
         }
