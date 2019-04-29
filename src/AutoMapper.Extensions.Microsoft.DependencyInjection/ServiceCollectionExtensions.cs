@@ -85,19 +85,11 @@ namespace AutoMapper
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
 
-            var profileTypeInfo = typeof(Profile).GetTypeInfo();
-            var profiles = allTypes
-                .Where(t => profileTypeInfo.IsAssignableFrom(t) && !t.IsAbstract)
-                .ToArray();
-
             void ConfigAction(IServiceProvider serviceProvider, IMapperConfigurationExpression cfg)
             {
                 configAction?.Invoke(serviceProvider, cfg);
 
-                foreach (var profile in profiles.Select(t => t.AsType()))
-                {
-                    cfg.AddProfile(profile);
-                }
+                cfg.AddMaps(assembliesToScan);
             }
 
             var openTypes = new[]

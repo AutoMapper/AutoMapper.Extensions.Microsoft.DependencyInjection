@@ -21,6 +21,17 @@
         public int ConvertedValue { get; set; }
     }
 
+    public class Source3
+    {
+        public int Value { get; set; }
+    }
+
+    [AutoMap(typeof(Source3))]
+    public class Dest3
+    {
+        public int Value { get; set; }
+    }
+
     public class Profile1 : Profile
     {
         public Profile1()
