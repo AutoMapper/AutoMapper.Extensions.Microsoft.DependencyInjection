@@ -72,6 +72,13 @@
         int Modify(int value);
     }
 
+    public class MutableService : ISomeService
+    {
+        public int Value { get; set; }
+
+        public int Modify(int value) => value + Value;
+    }
+
     public class FooService : ISomeService
     {
         private readonly int _value;
