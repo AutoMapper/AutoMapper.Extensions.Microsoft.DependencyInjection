@@ -44,14 +44,8 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests.Integrations
 		{
 			//arrange
 			var services = new ServiceCollection();
-			services.TryAddSingleton(p =>
-			{
-				var config =
-					new MapperConfiguration(mc => { mc.CreateMap<Foo, Bar>().ReverseMap(); });
-				return config;
-			});
 			services.TryAddSingleton<ISingletonService, TestSingletonService>();
-			services.AddAutoMapper(GetType().Assembly);
+			services.AddAutoMapper(cfg => cfg.CreateMap<Foo, Bar>().ReverseMap(), GetType().Assembly);
 			var sp = services.BuildServiceProvider();
 			Bar actual;
 
