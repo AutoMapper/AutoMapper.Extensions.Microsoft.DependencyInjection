@@ -46,8 +46,6 @@ public class EmployeesController {
 }
 ```
 
-You cannot use the static `Mapper` class to map, as this does not play nicely with dependency injection.
-
 ### ProjectTo usage
 
 Starting with 8.0 you can use `IMapper.ProjectTo`. The old `ProjectTo` is an extension method and does not have dependency injection available. Pass an `IConfigurationProvider` instance directly:
@@ -66,10 +64,8 @@ var orders = await dbContext.Orders
 					   .ToListAsync();
 ```
 
-If you use `ProjectTo` without passing in the configuration instance, AutoMapper falls back to the uninitialized static instance, and you will see a runtime exception.
-
 ### Configuration Validation
-Don't use the static `Mapper.Configuration.AssertConfigurationIsValid()`, it just won't work. Instead you can let the DI framework inject an instance of `IMapper` into your `Configure()` method. You can then use its ConfigurationProvider property to call `AssertConfigurationIsValid()`.
+Inject an instance of `IMapper` into your `Configure()` method. You can then use its ConfigurationProvider property to call `AssertConfigurationIsValid()`.
 
 ``` diff
 public class Startup
