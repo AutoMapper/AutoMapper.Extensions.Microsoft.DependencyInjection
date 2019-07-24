@@ -63,33 +63,3 @@ var orders = await dbContext.Orders
                        .ProjectTo<OrderDto>(_mapper.ConfigurationProvider)
 					   .ToListAsync();
 ```
-
-### Configuration Validation
-Inject an instance of `IMapper` into your `Configure()` method. You can then use its ConfigurationProvider property to call `AssertConfigurationIsValid()`.
-
-``` diff
-public class Startup
-{
-    public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddAutoMapper(/* ... */);
-    }
-
--   public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-+   public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
-    {
-+        autoMapper.ConfigurationProvider.AssertConfigurationIsValid();
-    }
-}
-```
-
-You can also inject just the `IConfigurationProvider`, but beware that an interface with the same name exists in the Microsoft.Extensions.Configuration namespace so use a fully qualified name.
-
-``` diff
--public void Configure(IApplicationBuilder app, IHostingEnvironment env, IMapper autoMapper)
-+public void Configure(IApplicationBuilder app, IHostingEnvironment env, AutoMapper.IConfigurationProvider autoMapper)
-{
--    autoMapper.ConfigurationProvider.AssertConfigurationIsValid();
-+    autoMapper.AssertConfigurationIsValid();
-}
-```
