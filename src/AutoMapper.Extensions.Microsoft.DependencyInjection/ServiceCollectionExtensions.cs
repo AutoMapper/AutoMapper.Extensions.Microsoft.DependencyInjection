@@ -21,20 +21,6 @@ namespace AutoMapper
 	/// </summary>
 	public static class ServiceCollectionExtensions
     {
-        private const string ObsoleteNoAssemblies = "This overload is error prone and it will be removed. Please pass the assemblies to scan explicitly. You can use AppDomain.CurrentDomain.GetAssemblies() if that works for you.";
-
-        [Obsolete(ObsoleteNoAssemblies)]
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services) =>
-            services.AddAutoMapper((Action<IServiceProvider, IMapperConfigurationExpression>)null, AppDomain.CurrentDomain.GetAssemblies());
-
-        [Obsolete(ObsoleteNoAssemblies)]
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
-            => services.AddAutoMapper((sp, cfg) => configAction?.Invoke(cfg), AppDomain.CurrentDomain.GetAssemblies());
-
-        [Obsolete(ObsoleteNoAssemblies)]
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
-            => services.AddAutoMapper(configAction, AppDomain.CurrentDomain.GetAssemblies());
-
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 

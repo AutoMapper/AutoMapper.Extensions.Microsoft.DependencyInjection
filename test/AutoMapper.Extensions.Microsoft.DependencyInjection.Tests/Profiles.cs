@@ -93,7 +93,7 @@
 
     internal class FooMappingAction : IMappingAction<object, object>
     {
-        public void Process(object source, object destination) { }
+        public void Process(object source, object destination, ResolutionContext context) { }
     }
 
     internal class FooValueResolver: IValueResolver<object, object, object>

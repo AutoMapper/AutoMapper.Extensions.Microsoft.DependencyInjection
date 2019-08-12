@@ -11,7 +11,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void Should_not_register_static_instance_when_configured()
         {
             IServiceCollection services = new ServiceCollection();
-            services.AddAutoMapper(cfg => cfg.CreateMissingTypeMaps = false, typeof(Source3));
+            services.AddAutoMapper(typeof(Source3));
 
             var serviceProvider = services.BuildServiceProvider();
 
