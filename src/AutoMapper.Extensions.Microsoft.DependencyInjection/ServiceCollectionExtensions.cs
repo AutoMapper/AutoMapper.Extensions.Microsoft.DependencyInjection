@@ -93,6 +93,14 @@ namespace AutoMapper
                     && t.AsType().ImplementsGenericInterface(openType))))
             {
                 services.AddTransient(type.AsType());
+                // It is also useful to be able to resolve the type the closed interface as well. 
+                foreach (var @interface in type.GetInterfaces())
+                {
+                    if (@interface.IsGenericType && openTypes.Any(openType => openType == @interface.GetGenericTypeDefinition()))
+                    {
+                        services.AddTransient(@interface, type);
+                    }
+                }
             }
 
             services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
