@@ -29,7 +29,7 @@ This registers AutoMapper:
 
 Mapping configuration is static as it is the root object that can create an `IMapper`.
 
-Mapper instances are registered as transient. You can configure this with the `serviceLifetime` parameter. Be careful changing this as `Mapper` takes a dependency on a factory method to instantiate the other extensions.
+Mapper instances are registered as transient. You can configure this with the `serviceLifetime` parameter. Be careful changing this, as `Mapper` takes a dependency on a factory method to instantiate the other extensions.
 
 ### Mapper.Map usage
 
