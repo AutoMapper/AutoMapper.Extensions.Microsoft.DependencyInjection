@@ -29,11 +29,11 @@ This registers AutoMapper:
 
 Mapping configuration is static as it is the root object that can create an `IMapper`.
 
-Mapper instances are registered as transient as they are intented to be used within the lifetime of a request. You can configure this with the `serviceLifetime` parameter. Be careful changing this as `Mapper` takes a dependency on a factory method to instantiate the other extensions.
+Mapper instances are registered as transient. You can configure this with the `serviceLifetime` parameter. Be careful changing this as `Mapper` takes a dependency on a factory method to instantiate the other extensions.
 
 ### Mapper.Map usage
 
-To map at runtime, you'll first need a scope. In an ASP.NET Core application, each request already has a scope, so you can depend on `IMapper` directly:
+To map at runtime, add a dependency on `IMapper`:
 
 ```c#
 public class EmployeesController {
