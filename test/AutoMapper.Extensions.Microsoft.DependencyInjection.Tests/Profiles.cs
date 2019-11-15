@@ -32,6 +32,17 @@
         public int Value { get; set; }
     }
 
+
+    public class Source4
+    {
+        public string Value { get; set; }
+    }
+
+    public class Dest4
+    {
+        public string Value { get; set; }
+    }
+
     public class Profile1 : Profile
     {
         public Profile1()
@@ -49,6 +60,14 @@
             CreateMap<Source2, Dest2>()
                 .ForMember(d => d.ResolvedValue, opt => opt.MapFrom<DependencyResolver>())
                 .ForMember(d => d.ConvertedValue, opt => opt.ConvertUsing<DependencyValueConverter, int>());
+        }
+    }
+
+    public class ProfileWithDependency : Profile
+    {
+        public ProfileWithDependency(ISomeService2 service)
+        {
+            CreateMap<Source4, Dest4>();
         }
     }
 
@@ -72,6 +91,11 @@
         int Modify(int value);
     }
 
+    public interface ISomeService2
+    {
+        string Modify(string value);
+    }
+
     public class MutableService : ISomeService
     {
         public int Value { get; set; }
@@ -89,6 +113,16 @@
         }
 
         public int Modify(int value) => value + _value;
+    }
+
+    public class TrimStringService : ISomeService2
+    {
+        public string Modify(string value)
+        {
+            return value == null
+                ? string.Empty
+                : value.Trim();
+        }
     }
 
     internal class FooMappingAction : IMappingAction<object, object>

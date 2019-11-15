@@ -12,6 +12,7 @@
         public DependencyTests()
         {
             IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<ISomeService2, TrimStringService>();
             services.AddTransient<ISomeService>(sp => new FooService(5));
             services.AddAutoMapper(typeof(Source), typeof(Profile));
             _provider = services.BuildServiceProvider();

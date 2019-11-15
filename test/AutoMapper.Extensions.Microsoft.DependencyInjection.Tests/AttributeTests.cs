@@ -11,6 +11,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void Should_not_register_static_instance_when_configured()
         {
             IServiceCollection services = new ServiceCollection();
+            services.AddSingleton<ISomeService2, TrimStringService>();
             services.AddAutoMapper(typeof(Source3));
 
             var serviceProvider = services.BuildServiceProvider();

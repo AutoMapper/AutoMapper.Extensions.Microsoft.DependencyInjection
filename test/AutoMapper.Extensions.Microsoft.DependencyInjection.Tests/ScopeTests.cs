@@ -10,6 +10,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void Can_depend_on_scoped_services_as_transient_default()
         {
             var services = new ServiceCollection();
+            services.AddSingleton<ISomeService2, TrimStringService>();
             services.AddAutoMapper(new [] { typeof(Source).Assembly });
             services.AddScoped<ISomeService, MutableService>();
 
@@ -32,6 +33,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void Can_depend_on_scoped_services_as_scoped()
         {
             var services = new ServiceCollection();
+            services.AddSingleton<ISomeService2, TrimStringService>();
             services.AddAutoMapper(new [] { typeof(Source).Assembly }, ServiceLifetime.Scoped);
             services.AddScoped<ISomeService, MutableService>();
 
@@ -54,6 +56,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         public void Cannot_correctly_resolve_scoped_services_as_singleton()
         {
             var services = new ServiceCollection();
+            services.AddSingleton<ISomeService2, TrimStringService>();
             services.AddAutoMapper(new [] { typeof(Source).Assembly }, ServiceLifetime.Singleton);
             services.AddScoped<ISomeService, MutableService>();
 
