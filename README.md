@@ -1,5 +1,7 @@
 # AutoMapper extensions for Microsoft.Extensions.DependencyInjection
 
+[![NuGet](http://img.shields.io/nuget/v/AutoMapper.Extensions.Microsoft.DependencyInjection.svg)](https://www.nuget.org/packages/AutoMapper.Extensions.Microsoft.DependencyInjection/)
+
 Scans assemblies and:
 
 1. adds profiles to mapping configuration
