@@ -24,84 +24,84 @@ namespace AutoMapper
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, bool validate, params Assembly[] assemblies)
-            => AddAutoMapperClasses(services, null, assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, bool assertConfigurationIsValid, params Assembly[] assemblies)
+            => AddAutoMapperClasses(services, null, assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, bool validate, params Assembly[] assemblies)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, bool assertConfigurationIsValid, params Assembly[] assemblies)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, configAction, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, bool validate, params Assembly[] assemblies)
-            => AddAutoMapperClasses(services, configAction, assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, bool assertConfigurationIsValid, params Assembly[] assemblies)
+            => AddAutoMapperClasses(services, configAction, assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
             => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool validate = false)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, serviceLifetime, validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool assertConfigurationIsValid = false)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, serviceLifetime, assertConfigurationIsValid);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, bool validate)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, bool assertConfigurationIsValid)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies)
             => AddAutoMapperClasses(services, configAction, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool validate = false)
-            => AddAutoMapperClasses(services, configAction, assemblies, serviceLifetime, validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool assertConfigurationIsValid = false)
+            => AddAutoMapperClasses(services, configAction, assemblies, serviceLifetime, assertConfigurationIsValid);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, bool validate)
-            => AddAutoMapperClasses(services, configAction, assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, IEnumerable<Assembly> assemblies, bool assertConfigurationIsValid)
+            => AddAutoMapperClasses(services, configAction, assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool validate = false)
-            => AddAutoMapperClasses(services, null, assemblies, serviceLifetime, validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies, ServiceLifetime serviceLifetime, bool assertConfigurationIsValid = false)
+            => AddAutoMapperClasses(services, null, assemblies, serviceLifetime, assertConfigurationIsValid);
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies, bool validate)
-            => AddAutoMapperClasses(services, null, assemblies, validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, IEnumerable<Assembly> assemblies, bool assertConfigurationIsValid)
+            => AddAutoMapperClasses(services, null, assemblies, assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Type[] profileAssemblyMarkerTypes)
             => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, bool validate, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, bool assertConfigurationIsValid, params Type[] profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, null, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
             => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, bool validate, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction, bool assertConfigurationIsValid, params Type[] profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, params Type[] profileAssemblyMarkerTypes)
             => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly));
 
-        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, bool validate, params Type[] profileAssemblyMarkerTypes)
-            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), validate: validate);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, bool assertConfigurationIsValid, params Type[] profileAssemblyMarkerTypes)
+            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), assertConfigurationIsValid: assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction,
             IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
             => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction,
-            IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime, bool validate = false)
-            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime, validate);
+            IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime, bool assertConfigurationIsValid = false)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime, assertConfigurationIsValid);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction,
             IEnumerable<Type> profileAssemblyMarkerTypes, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
             => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), serviceLifetime);
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction,
-            IEnumerable<Type> profileAssemblyMarkerTypes, bool validate)
-            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), validate: validate);
+            IEnumerable<Type> profileAssemblyMarkerTypes, bool assertConfigurationIsValid)
+            => AddAutoMapperClasses(services, configAction, profileAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly), assertConfigurationIsValid: assertConfigurationIsValid);
 
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction,
-            IEnumerable<Assembly> assembliesToScan, ServiceLifetime serviceLifetime = ServiceLifetime.Transient, bool validate = false)
+            IEnumerable<Assembly> assembliesToScan, ServiceLifetime serviceLifetime = ServiceLifetime.Transient, bool assertConfigurationIsValid = false)
         {
             // Just return if we've already added AutoMapper to avoid double-registration
             if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
@@ -141,7 +141,7 @@ namespace AutoMapper
             services.AddSingleton<IConfigurationProvider>(sp =>
             {
                 var configuration = new MapperConfiguration(cfg => ConfigAction(sp, cfg));
-                if (validate)
+                if (assertConfigurationIsValid)
                 {
                     configuration.AssertConfigurationIsValid();
                 }
