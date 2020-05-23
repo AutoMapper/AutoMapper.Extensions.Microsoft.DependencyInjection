@@ -23,6 +23,8 @@ namespace AutoMapper
     {
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), Enumerable.Empty<Assembly>());
 
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, bool assertConfigurationIsValid, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies, assertConfigurationIsValid: assertConfigurationIsValid);

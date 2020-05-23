@@ -13,7 +13,9 @@
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
-            services.AddAutoMapper(typeof(Source), typeof(Profile));
+            services.AddSingleton<DependencyResolver>();
+            services.AddSingleton<DependencyValueConverter>();
+            services.AddAutoMapper(cfg => cfg.AddProfile<Profile2>());
             _provider = services.BuildServiceProvider();
 
             _provider.GetService<IConfigurationProvider>().AssertConfigurationIsValid();
@@ -32,7 +34,7 @@
         public void ShouldConvertWithDependency()
         {
             var mapper = _provider.GetService<IMapper>();
-            var dest = mapper.Map<Source2, Dest2>(new Source2 { ConvertedValue = 5});
+            var dest = mapper.Map<Source2, Dest2>(new Source2 { ConvertedValue = 5 });
 
             dest.ConvertedValue.ShouldBe(10);
         }

@@ -2,12 +2,12 @@
 {
     public class Source
     {
-        
+
     }
 
     public class Dest
     {
-        
+
     }
 
     public class Source2
@@ -96,7 +96,7 @@
         public void Process(object source, object destination, ResolutionContext context) { }
     }
 
-    internal class FooValueResolver: IValueResolver<object, object, object>
+    internal class FooValueResolver : IValueResolver<object, object, object>
     {
         public object Resolve(object source, object destination, object destMember, ResolutionContext context)
         {
@@ -135,4 +135,25 @@
         public int Convert(int sourceMember, ResolutionContext context)
             => _service.Modify(sourceMember);
     }
+
+    #region Validate Test Profile
+    class InvalidProfile : Profile
+    {
+        public InvalidProfile()
+        {
+            // PropertyTwo is unmapped, profile is invalid
+            CreateMap<SourceInvalid, DestinationInvalid>();
+        }
+    }
+
+    class SourceInvalid
+    {
+        public string PropertyOne { get; set; }
+    }
+
+    class DestinationInvalid
+    {
+        public string PropertyTwo { get; set; }
+    }
+    #endregion
 }
