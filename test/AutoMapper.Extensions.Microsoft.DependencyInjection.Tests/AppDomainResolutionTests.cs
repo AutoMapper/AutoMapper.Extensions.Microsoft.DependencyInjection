@@ -4,7 +4,6 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
     using System.Reflection;
-    using global::Microsoft.Extensions.DependencyModel;
     using Shouldly;
     using Xunit;
 
