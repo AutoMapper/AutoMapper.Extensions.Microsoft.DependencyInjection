@@ -1,25 +1,24 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using AutoMapper.Internal;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AutoMapper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
-    using Microsoft.Extensions.DependencyInjection;
-
-	/// <summary>
-	/// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection:
-	/// <list type="bullet">
-	/// <item> Finds <see cref="Profile"/> classes and initializes a new <see cref="MapperConfiguration" />,</item> 
-	/// <item> Scans for <see cref="ITypeConverter{TSource,TDestination}"/>, <see cref="IValueResolver{TSource,TDestination,TDestMember}"/>, <see cref="IMemberValueResolver{TSource,TDestination,TSourceMember,TDestMember}" /> and <see cref="IMappingAction{TSource,TDestination}"/> implementations and registers them as <see cref="ServiceLifetime.Transient"/>, </item>
-	/// <item> Registers <see cref="IConfigurationProvider"/> as <see cref="ServiceLifetime.Singleton"/>, and</item>
-	/// <item> Registers <see cref="IMapper"/> as a configurable <see cref="ServiceLifetime"/> (default is <see cref="ServiceLifetime.Transient"/>)</item>
-	/// </list>
-	/// After calling AddAutoMapper you can resolve an <see cref="IMapper" /> instance from a scoped service provider, or as a dependency
-	/// To use <see cref="QueryableExtensions.Extensions.ProjectTo{TDestination}(IQueryable,IConfigurationProvider, System.Linq.Expressions.Expression{System.Func{TDestination, object}}[])" /> you can resolve the <see cref="IConfigurationProvider"/> instance directly for from an <see cref="IMapper" /> instance.
-	/// </summary>
-	public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection:
+    /// <list type="bullet">
+    /// <item> Finds <see cref="Profile"/> classes and initializes a new <see cref="MapperConfiguration" />,</item> 
+    /// <item> Scans for <see cref="ITypeConverter{TSource,TDestination}"/>, <see cref="IValueResolver{TSource,TDestination,TDestMember}"/>, <see cref="IMemberValueResolver{TSource,TDestination,TSourceMember,TDestMember}" /> and <see cref="IMappingAction{TSource,TDestination}"/> implementations and registers them as <see cref="ServiceLifetime.Transient"/>, </item>
+    /// <item> Registers <see cref="IConfigurationProvider"/> as <see cref="ServiceLifetime.Singleton"/>, and</item>
+    /// <item> Registers <see cref="IMapper"/> as a configurable <see cref="ServiceLifetime"/> (default is <see cref="ServiceLifetime.Transient"/>)</item>
+    /// </list>
+    /// After calling AddAutoMapper you can resolve an <see cref="IMapper" /> instance from a scoped service provider, or as a dependency
+    /// To use <see cref="QueryableExtensions.Extensions.ProjectTo{TDestination}(IQueryable,IConfigurationProvider, System.Linq.Expressions.Expression{System.Func{TDestination, object}}[])" /> you can resolve the <see cref="IConfigurationProvider"/> instance directly for from an <see cref="IMapper" /> instance.
+    /// </summary>
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
@@ -59,25 +58,25 @@ namespace AutoMapper
         private static IServiceCollection AddAutoMapperClasses(IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction, 
             IEnumerable<Assembly> assembliesToScan, ServiceLifetime serviceLifetime = ServiceLifetime.Transient)
         {
-            // Just return if we've already added AutoMapper to avoid double-registration
-            if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
-                return services;
-
+            var sd = services.FirstOrDefault(sd => sd.ServiceType == typeof(IConfigurationProvider));
+            ConfigFactory configFactory;
+            if (sd == null)
+            {
+                configFactory = new ConfigFactory();
+                services.AddSingleton<IConfigurationProvider>(configFactory.Build);
+                services.Add(new ServiceDescriptor(typeof(IMapper), sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService), serviceLifetime));
+            }
+            else
+            {
+                configFactory = (ConfigFactory) sd.ImplementationFactory.Target;
+            }
+            configFactory.Configs += configAction;
             assembliesToScan = assembliesToScan as Assembly[] ?? assembliesToScan.ToArray();
-
             var allTypes = assembliesToScan
                 .Where(a => !a.IsDynamic && a.GetName().Name != nameof(AutoMapper))
-                .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
                 .SelectMany(a => a.DefinedTypes)
                 .ToArray();
-
-            void ConfigAction(IServiceProvider serviceProvider, IMapperConfigurationExpression cfg)
-            {
-                configAction?.Invoke(serviceProvider, cfg);
-
-                cfg.AddMaps(assembliesToScan);
-            }
-
+            configFactory.Configs += (_, c) => c.AddMaps(assembliesToScan);
             var openTypes = new[]
             {
                 typeof(IValueResolver<,,>),
@@ -93,18 +92,19 @@ namespace AutoMapper
             {
                 services.AddTransient(type.AsType());
             }
-
-            services.AddSingleton<IConfigurationProvider>(sp => new MapperConfiguration(cfg => ConfigAction(sp, cfg)));
-            services.Add(new ServiceDescriptor(typeof(IMapper),
-	            sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService), serviceLifetime));
-
             return services;
         }
-
-        private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
-            => type.IsGenericType(interfaceType) || type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
-
-        private static bool IsGenericType(this Type type, Type genericType)
-            => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
+        class ConfigFactory
+        {
+            public event Action<IServiceProvider, IMapperConfigurationExpression> Configs;
+            public MapperConfiguration Build(IServiceProvider sp)
+            {
+                if (Configs == null)
+                {
+                    throw new ArgumentException("You need to pass either some assemblies to scan or an explicit configuration!");
+                }
+                return new MapperConfiguration(c => Configs.Invoke(sp, c));
+            }
+        }
     }
 }

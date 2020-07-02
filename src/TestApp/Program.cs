@@ -11,6 +11,7 @@ namespace TestApp
         {
             IServiceCollection services = new ServiceCollection();
             services.AddTransient<ISomeService>(sp => new FooService(5));
+            services.AddAutoMapper(Type.EmptyTypes);
             services.AddAutoMapper(typeof(Source));
             var provider = services.BuildServiceProvider();
             using (var scope = provider.CreateScope())
