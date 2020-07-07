@@ -3,26 +3,33 @@
   <PropertyGroup>
     <Description>AutoMapper extensions for ASP.NET Core</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <VersionPrefix>7.0.0</VersionPrefix>
-    <Authors>Jimmy Bogard</Authors>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>AutoMapper.Extensions.Microsoft.DependencyInjection</AssemblyName>
     <PackageId>AutoMapper.Extensions.Microsoft.DependencyInjection</PackageId>
-    <PackageIconUrl>https://s3.amazonaws.com/automapper/icon.png</PackageIconUrl>
-    <PackageProjectUrl>http://automapper.org</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/AutoMapper/AutoMapper/blob/master/LICENSE.txt</PackageLicenseUrl>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\AutoMapper.Extensions.Microsoft.DependencyInjection.snk</AssemblyOriginatorKeyFile>
+    <PackageIcon>icon.png</PackageIcon>
+    <PackageProjectUrl>https://automapper.org</PackageProjectUrl>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.3" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.3" />
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="[3.0.0, 4.0)" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="[3.0.0, 4.0)" />
+    <PackageReference Include="AutoMapper" Version="[10.0.0, 11.0.0)" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="2.3.0" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
