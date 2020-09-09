@@ -1,6 +1,7 @@
-﻿using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
+using System;
+using System.Linq;
 using Xunit;
 
 namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
@@ -10,11 +11,28 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void Can_register_multiple_times()
         {
+            static void registration(IServiceCollection services)
+                => services.AddAutoMapper(cfg => { });
+
+            AutoMapperShouldBeRegistrableMultipleTimesUsing(registration);
+        }
+
+        [Fact]
+        public void Can_register_multiple_times_using_service_provider()
+        {
+            static void registration(IServiceCollection services)
+                => services.AddAutoMapper((cfg, sp) => { });
+
+            AutoMapperShouldBeRegistrableMultipleTimesUsing(registration);
+        }
+
+        private void AutoMapperShouldBeRegistrableMultipleTimesUsing(Action<IServiceCollection> registration)
+        {
             var services = new ServiceCollection();
 
-            services.AddAutoMapper(cfg => { });
-            services.AddAutoMapper(cfg => { });
-            services.AddAutoMapper(cfg => { });
+            registration(services);
+            registration(services);
+            registration(services);
 
             var serviceProvider = services.BuildServiceProvider();
 

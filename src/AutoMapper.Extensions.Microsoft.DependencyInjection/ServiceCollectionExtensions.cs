@@ -1,13 +1,13 @@
 ﻿namespace AutoMapper
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Reflection;
     using AutoMapper.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Options;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection:
@@ -25,6 +25,9 @@
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configAction)
             => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(cfg), null);
 
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services, Action<IServiceProvider, IMapperConfigurationExpression> configAction)
+            => AddAutoMapperClasses(services, (sp, cfg) => configAction?.Invoke(sp, cfg), null);
+        
         public static IServiceCollection AddAutoMapper(this IServiceCollection services, params Assembly[] assemblies)
             => AddAutoMapperClasses(services, null, assemblies);
 
