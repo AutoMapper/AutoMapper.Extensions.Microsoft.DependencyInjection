@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
-using System;
+﻿using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using Xunit;
 
 namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests

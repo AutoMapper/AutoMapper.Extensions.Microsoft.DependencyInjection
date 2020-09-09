@@ -1,13 +1,13 @@
 ﻿namespace AutoMapper
 {
-    using AutoMapper.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Microsoft.Extensions.Options;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using AutoMapper.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Extensions to scan for AutoMapper classes and register the configuration, mapping, and extensions with the service collection:
