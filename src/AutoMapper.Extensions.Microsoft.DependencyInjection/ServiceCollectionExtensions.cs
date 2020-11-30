@@ -1,11 +1,11 @@
-﻿namespace AutoMapper
+﻿namespace Microsoft.Extensions.DependencyInjection
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Reflection;
+    using AutoMapper;
     using AutoMapper.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Options;
 
