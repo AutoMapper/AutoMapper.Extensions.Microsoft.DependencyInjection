@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>AutoMapper extensions for ASP.NET Core</Description>
     <Copyright>Copyright Jimmy Bogard</Copyright>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
     <AssemblyName>AutoMapper.Extensions.Microsoft.DependencyInjection</AssemblyName>
     <PackageId>AutoMapper.Extensions.Microsoft.DependencyInjection</PackageId>
     <SignAssembly>true</SignAssembly>
@@ -21,11 +21,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0" />
     <PackageReference Include="AutoMapper" Version="[10.1.1, 11.0.0)" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-    <PackageReference Include="MinVer" Version="2.3.0" PrivateAssets="All" />
+    <PackageReference Include="MinVer" Version="2.3.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
