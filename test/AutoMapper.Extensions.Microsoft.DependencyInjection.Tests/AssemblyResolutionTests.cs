@@ -33,7 +33,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void ShouldConfigureProfiles()
         {
-            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(3);
+            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(4);
         }
 
         [Fact]
