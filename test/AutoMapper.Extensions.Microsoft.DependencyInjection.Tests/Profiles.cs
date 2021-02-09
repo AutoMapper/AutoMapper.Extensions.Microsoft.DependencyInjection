@@ -1,4 +1,6 @@
-﻿namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
+﻿using System;
+
+namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     public class Source
     {
@@ -49,6 +51,7 @@
             CreateMap<Source2, Dest2>()
                 .ForMember(d => d.ResolvedValue, opt => opt.MapFrom<DependencyResolver>())
                 .ForMember(d => d.ConvertedValue, opt => opt.ConvertUsing<DependencyValueConverter, int>());
+            CreateMap(typeof(Enum), typeof(EnumDescriptor<>)).ConvertUsing(typeof(EnumDescriptorTypeConverter<>));
         }
     }
 
@@ -118,6 +121,18 @@
         {
             return null;
         }
+    }
+
+    public class EnumDescriptor<TSource> where TSource : Enum
+    {
+        public int Value { get; set; }
+    }
+
+    public class EnumDescriptorTypeConverter<TSource> : ITypeConverter<Enum, EnumDescriptor<TSource>>
+        where TSource : Enum
+    {
+        public EnumDescriptor<TSource> Convert(Enum source, EnumDescriptor<TSource> destination, ResolutionContext context) => 
+            new EnumDescriptor<TSource>{ Value = int.MaxValue };
     }
 
     internal class FooValueConverter : IValueConverter<int, int>
