@@ -3,6 +3,7 @@
 namespace TestApp
 {
     using AutoMapper;
+    using AutoMapper.Internal;
     using Microsoft.Extensions.DependencyInjection;
 
     public class Program
@@ -17,7 +18,7 @@ namespace TestApp
             {
                 var mapper = scope.ServiceProvider.GetService<IMapper>();
 
-                foreach (var typeMap in mapper.ConfigurationProvider.GetAllTypeMaps())
+                foreach (var typeMap in mapper.ConfigurationProvider.Internal().GetAllTypeMaps())
                 {
                     Console.WriteLine($"{typeMap.SourceType.Name} -> {typeMap.DestinationType.Name}");
                 }
