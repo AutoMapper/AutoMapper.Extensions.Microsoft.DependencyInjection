@@ -4,6 +4,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
 {
     using System;
     using System.Reflection;
+    using AutoMapper.Internal;
     using Shouldly;
     using Xunit;
 
@@ -33,7 +34,7 @@ namespace AutoMapper.Extensions.Microsoft.DependencyInjection.Tests
         [Fact]
         public void ShouldConfigureProfiles()
         {
-            _provider.GetService<IConfigurationProvider>().GetAllTypeMaps().Length.ShouldBe(4);
+            _provider.GetService<IConfigurationProvider>().Internal().GetAllTypeMaps().Count.ShouldBe(4);
         }
 
         [Fact]
