@@ -1,7 +1,7 @@
 # AutoMapper extensions for Microsoft.Extensions.DependencyInjection
 
 [![CI](https://github.com/automapper/automapper.extensions.microsoft.dependencyinjection/workflows/CI/badge.svg)](https://github.com/automapper/automapper.extensions.microsoft.dependencyinjection/workflows/CI)
-[![NuGet](http://img.shields.io/nuget/v/automapper.extensions.microsoft.dependencyinjection.svg)](https://www.nuget.org/packages/automapper.extensions.microsoft.dependencyinjection/)
+[![NuGet](http://img.shields.io/nuget/v/automapper.extensions.microsoft.dependencyinjection.svg?label=NuGet)](https://www.nuget.org/packages/automapper.extensions.microsoft.dependencyinjection/)
 [![MyGet (dev)](https://img.shields.io/myget/automapperdev/vpre/automapper.extensions.microsoft.dependencyinjection.svg?label=MyGet)](https://myget.org/feed/automapperdev/package/nuget/AutoMapper.Extensions.Microsoft.DependencyInjection)
 
 Scans assemblies and:
