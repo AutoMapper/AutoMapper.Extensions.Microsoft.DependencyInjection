@@ -69,7 +69,7 @@
                     .Configure<IServiceProvider>((options, sp) => configAction(sp, options));
             }
 
-            var assembliesToScanArray = assembliesToScan as Assembly[] ?? assembliesToScan?.ToArray();
+            var assembliesToScanArray = (assembliesToScan as Assembly[] ?? assembliesToScan)?.Distinct().ToArray();
 
             if (assembliesToScanArray != null && assembliesToScanArray.Length > 0)
             {
