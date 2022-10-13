@@ -6,6 +6,7 @@
     using System.Reflection;
     using AutoMapper;
     using AutoMapper.Configuration;
+    using AutoMapper.Internal;
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Microsoft.Extensions.Options;
 
@@ -65,17 +66,12 @@
         {
             if (configAction != null)
             {
-                services.AddOptions<MapperConfigurationExpression>()
-                    .Configure<IServiceProvider>((options, sp) => configAction(sp, options));
+                services.AddOptions<MapperConfigurationExpression>().Configure<IServiceProvider>((options, sp) => configAction(sp, options));
             }
-
             if (assembliesToScan != null)
             {
                 assembliesToScan = new HashSet<Assembly>(assembliesToScan.Where(a => !a.IsDynamic && a != typeof(Mapper).Assembly));
                 services.Configure<MapperConfigurationExpression>(options => options.AddMaps(assembliesToScan));
-                var allTypes = assembliesToScan
-                    .SelectMany(a => a.GetTypes())
-                    .Where(t => t.IsClass && !t.IsAbstract);
                 var openTypes = new[]
                 {
                     typeof(IValueResolver<,,>),
@@ -84,34 +80,26 @@
                     typeof(IValueConverter<,>),
                     typeof(IMappingAction<,>)
                 };
-                foreach (var type in allTypes.Where(type => Array.Exists(openTypes, openType => type.ImplementsGenericInterface(openType))))
+                foreach (var type in assembliesToScan.SelectMany(a => a.GetTypes().Where(type => type.IsClass && !type.IsAbstract && Array.Exists(openTypes,
+                    openType => type.GetGenericInterface(openType) != null))))
                 {
                     // use try add to avoid double-registration
                     services.TryAddTransient(type);
                 }
             }
-
             // Just return if we've already added AutoMapper to avoid double-registration
             if (services.Any(sd => sd.ServiceType == typeof(IMapper)))
+            {
                 return services;
-
+            }
             services.AddSingleton<IConfigurationProvider>(sp =>
             {
                 // A mapper configuration is required
                 var options = sp.GetRequiredService<IOptions<MapperConfigurationExpression>>();
                 return new MapperConfiguration(options.Value);
             });
-
-            services.Add(new ServiceDescriptor(typeof(IMapper),
-                sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService), serviceLifetime));
-
+            services.Add(new ServiceDescriptor(typeof(IMapper), sp => new Mapper(sp.GetRequiredService<IConfigurationProvider>(), sp.GetService), serviceLifetime));
             return services;
         }
-
-        private static bool ImplementsGenericInterface(this Type type, Type interfaceType)
-            => type.IsGenericType(interfaceType) || type.GetTypeInfo().ImplementedInterfaces.Any(@interface => @interface.IsGenericType(interfaceType));
-
-        private static bool IsGenericType(this Type type, Type genericType)
-            => type.GetTypeInfo().IsGenericType && type.GetGenericTypeDefinition() == genericType;
     }
 }
