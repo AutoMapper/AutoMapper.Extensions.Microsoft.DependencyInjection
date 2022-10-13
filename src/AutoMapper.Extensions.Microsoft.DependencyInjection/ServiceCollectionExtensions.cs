@@ -69,18 +69,13 @@
                     .Configure<IServiceProvider>((options, sp) => configAction(sp, options));
             }
 
-            var assembliesToScanArray = assembliesToScan as Assembly[] ?? assembliesToScan?.ToArray();
-
-            if (assembliesToScanArray != null && assembliesToScanArray.Length > 0)
+            if (assembliesToScan != null)
             {
-                var allTypes = assembliesToScanArray
-                    .Where(a => !a.IsDynamic && a != typeof(Mapper).Assembly)
-                    .Distinct() // avoid AutoMapper.DuplicateTypeMapConfigurationException
-                    .SelectMany(a => a.DefinedTypes)
-                    .ToArray();
-
-                services.Configure<MapperConfigurationExpression>(options => options.AddMaps(assembliesToScanArray));
-
+                assembliesToScan = new HashSet<Assembly>(assembliesToScan.Where(a => !a.IsDynamic && a != typeof(Mapper).Assembly));
+                services.Configure<MapperConfigurationExpression>(options => options.AddMaps(assembliesToScan));
+                var allTypes = assembliesToScan
+                    .SelectMany(a => a.GetTypes())
+                    .Where(t => t.IsClass && !t.IsAbstract);
                 var openTypes = new[]
                 {
                     typeof(IValueResolver<,,>),
@@ -89,13 +84,10 @@
                     typeof(IValueConverter<,>),
                     typeof(IMappingAction<,>)
                 };
-                foreach (var type in openTypes.SelectMany(openType => allTypes
-                    .Where(t => t.IsClass
-                        && !t.IsAbstract
-                        && t.AsType().ImplementsGenericInterface(openType))))
+                foreach (var type in allTypes.Where(type => Array.Exists(openTypes, openType => type.ImplementsGenericInterface(openType))))
                 {
                     // use try add to avoid double-registration
-                    services.TryAddTransient(type.AsType());
+                    services.TryAddTransient(type);
                 }
             }
 
