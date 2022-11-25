@@ -26,6 +26,8 @@ $artifacts = "..\artifacts"
 
 if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
 
+New-Item -Path . -Name $artifacts -ItemType "directory"
+
 $artifacts = Resolve-Path $artifacts
 
 exec { & dotnet clean -c Release }
