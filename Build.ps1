@@ -22,9 +22,11 @@ function Exec
     }
 }
 
-$artifacts = Resolve-Path -Path ".\artifacts"
+$artifacts = ".\artifacts"
 
 if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
+
+$artifacts = Resolve-Path $artifacts
 
 exec { & dotnet clean -c Release }
 
