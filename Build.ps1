@@ -22,7 +22,7 @@ function Exec
     }
 }
 
-$artifacts = ".\artifacts"
+$artifacts = "..\artifacts"
 
 if(Test-Path $artifacts) { Remove-Item $artifacts -Force -Recurse }
 
